@@ -36,11 +36,8 @@ class DashboardController extends Controller
             $chartData[] = $absenHariIniRaw->where('keterangan_sholat', $sholat)->count();
         }
 
-        // ─────────────────────────────────────────────────────────────────
+      
         // 3. STATISTIK KELUARGA — dihitung dari HARI INI
-        // ─────────────────────────────────────────────────────────────────
-
-        // Jumlah keluarga yang hadir minimal 1 sesi hari ini
         $jumlahKeluargaAktif = presensi::whereDate('waktu_absen', $hari_ini)
             ->distinct('id_keluarga')
             ->count('id_keluarga');
@@ -51,24 +48,15 @@ class DashboardController extends Controller
             ->get()
             ->groupBy('id_keluarga')                   // kelompokkan per keluarga
             ->filter(function ($logs) {
-                // Cukup 1 anggota per sesi → pakai unique() pada keterangan_sholat
                 return $logs->pluck('keterangan_sholat')->unique()->count() >= 5;
             })
             ->count();
 
-        // ─────────────────────────────────────────────────────────────────
+       
         // 4. LEADERBOARD ISTIQOMAH — 7 Hari Terakhir
-        //
-        // ADIL: dihitung KEHADIRAN PER KELUARGA PER SESI PER HARI
-        //       bukan jumlah total baris absen.
-        //       → 1 keluarga hadir Subuh = 1 poin, tidak peduli ada
-        //         berapa anggota yang absen di sesi itu.
-        //       → Skor maks = 5 sesi × 7 hari = 35 poin
-        // ─────────────────────────────────────────────────────────────────
         $topDisiplin = DB::table('presensi')
             ->join('keluarga', 'presensi.id_keluarga', '=', 'keluarga.id_keluarga')
             ->where('presensi.waktu_absen', '>=', Carbon::now('Asia/Jakarta')->subDays(7)->startOfDay())
-            // Hitung kombinasi unik (keluarga, tanggal, sesi) = 1 poin per sesi per hari
             ->select(
                 'keluarga.id_keluarga',
                 'keluarga.nama_keluarga',
@@ -93,10 +81,6 @@ class DashboardController extends Controller
 
         
     }
-
-    // ─────────────────────────────────────────────────────────────────────
-    // cleanStorage — tidak diubah
-    // ─────────────────────────────────────────────────────────────────────
     public function cleanStorage()
     {
         try {
