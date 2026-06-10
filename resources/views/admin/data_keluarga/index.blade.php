@@ -43,6 +43,32 @@
             </div>
         </div>
     </x-slot>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-4">
+    <form method="GET" class="flex flex-col md:flex-row gap-2">
+        
+        <input
+            type="text"
+            name="search"
+            value="{{ request('search') }}"
+            placeholder="Cari keluarga atau anggota..."
+            class="flex-1 rounded-xl border-gray-300 dark:bg-[#1e1e1e] dark:border-gray-700 dark:text-white">
+
+        <button
+            type="submit"
+            class="px-6 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl transition-all">
+            Cari
+        </button>
+
+        @if(request('search'))
+        <a href="{{ url()->current() }}"
+        class="px-6 py-2 bg-gray-500 hover:bg-gray-400 text-white font-bold rounded-xl transition-all text-center">
+            Reset
+        </a>
+        @endif
+
+    </form>
+</div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/webcamjs/1.0.25/webcam.min.js"></script>
