@@ -4,24 +4,32 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\keluarga; // Pastikan huruf besar/kecil sesuai file Model kamu
+use App\Models\keluarga; 
 use App\Models\User;
 
 class KeluargaController extends Controller
 {
-    
-   public function index()
+    public function index(Request $request)
     {
-        // Ganti ->latest() dengan ->orderBy('id_keluarga', 'desc') 
-        // karena tabel kamu tidak memiliki kolom 'created_at'
-        $daftarKeluarga = keluarga::with([
-            'user', 
-            'anggotaKeluarga' => function($query) {
-                $query->orderByRaw("FIELD(hubungan, 'Kepala Keluarga', 'Ibu', 'Anak') ASC");
-            }
-        ])->orderBy('id_keluarga', 'desc')->get(); // <--- PERUBAHAN DI SINI
+        $search = $request->search;
 
-        return view('admin.data_keluarga.index', compact('daftarKeluarga'));
+        $daftarKeluarga = keluarga::with([
+            'user',
+            'anggotaKeluarga'
+        ])
+        ->when($search, function ($query) use ($search) {
+            $query->where('nama_keluarga', 'like', "%{$search}%")
+                ->orWhereHas('anggotaKeluarga', function ($q) use ($search) {
+                    $q->where('nama_anggota', 'like', "%{$search}%");
+                });
+        })
+        ->orderBy('id_keluarga', 'asc')
+        ->get();
+
+        return view('admin.data_keluarga.index', compact(
+            'daftarKeluarga',
+            'search'
+        ));
     }
 
    
@@ -42,10 +50,6 @@ class KeluargaController extends Controller
             return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
-
-    /**
-     * Hapus Keluarga sekaligus User Login
-     */
     public function destroy($id)
     {
         try {
