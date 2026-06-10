@@ -39,9 +39,13 @@ class LogPresensiController extends Controller
             $rekapKeluarga[$idKeluarga] = [
                 'nama_keluarga'   => $kk->keluarga->nama_keluarga ?? 'Keluarga Baru',
                 'kepala_keluarga' => $kk->nama_anggota,
-                'Subuh'   => null, 'Dzuhur'  => null, 'Ashar'   => null, 'Maghrib' => null, 'Isya'    => null,
+                'last_absen'      => $absenKeluargaIni->max('waktu_absen'),
+                'Subuh'   => null,
+                'Dzuhur'  => null,
+                'Ashar'   => null,
+                'Maghrib' => null,
+                'Isya'    => null,
             ];
-
             foreach (['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'] as $sesi) {
                 $absenSesi = $absenKeluargaIni->where('keterangan_sholat', $sesi)->sortBy('waktu_absen');
                 if ($absenSesi->isNotEmpty()) {
@@ -64,8 +68,12 @@ class LogPresensiController extends Controller
                 }
             }
         }
-        return view('admin.log_presensi.index', compact('rekapKeluarga', 'tanggalPilihan', 'sesiSholatPilihan'));
-    }
+        uasort($rekapKeluarga, function ($a, $b) {
+        return strtotime($b['last_absen'] ?? '1970-01-01')
+        <=> strtotime($a['last_absen'] ?? '1970-01-01');
+    });
+    return view('admin.log_presensi.index', compact('rekapKeluarga', 'tanggalPilihan', 'sesiSholatPilihan'));
+}
 
     public function exportPdf(Request $request)
 {
