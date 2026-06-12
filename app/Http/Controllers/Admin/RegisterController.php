@@ -72,4 +72,38 @@ class RegisterController extends Controller
             );
         }
     }
+    
+    public function updateAnggota(Request $request, $id)
+    {
+        $request->validate([
+            'nama_anggota' => 'required|string|max:255'
+        ]);
+
+        try {
+            $anggota = anggotaKeluarga::findOrFail($id);
+            $namaLama = $anggota->nama_anggota;
+            
+            // 1. Update nama anggota di tabel anggota_keluarga terlebih dahulu
+            $anggota->update([
+                'nama_anggota' => $request->nama_anggota
+            ]);
+
+            // 2. OTOMATISASI KARTU ATAS: Cek jika dia adalah Kepala Keluarga
+            if ($anggota->hubungan === 'Kepala Keluarga') {
+                // Ambil data data master keluarga terkait
+                $keluarga = \App\Models\Keluarga::find($anggota->id_keluarga);
+                
+                if ($keluarga) {
+                    // Ikut perbarui nama keluarga agar sinkron dengan Kepala Keluarga yang baru
+                    $keluarga->update([
+                        'nama_keluarga' => $request->nama_anggota
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success', 'Nama anggota ' . $namaLama . ' berhasil diubah menjadi ' . $request->nama_anggota);
+        } catch (Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mengubah nama anggota: ' . $e->getMessage());
+        }
+    }
 }
