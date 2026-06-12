@@ -13,11 +13,13 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index()
+   public function index()
     {
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
         $anggota = [];
+        $kepalaKeluarga = null; // Tambahkan inisialisasi variabel ini
         $riwayatSingkat = [];
+        
         $dataSesi = Presensi::getSesiSekarang();
         $sholatAktif = [
             'nama' => strtoupper($dataSesi['nama']),
@@ -26,10 +28,15 @@ class DashboardController extends Controller
         ];
         
         if ($keluarga) {
-            // PERBAIKAN URUTAN LOGIKA STRUKTUR KELUARGA (Kepala Keluarga -> Ibu -> Anak)
+            // 1. Ambil seluruh anggota keluarga (Urutan: Kepala Keluarga -> Ibu -> Anak)
             $anggota = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->orderByRaw("FIELD(hubungan, 'Kepala Keluarga', 'Ibu', 'Anak') ASC")
                 ->get();
+
+            // 2. AMBIL DATA KEPALA KELUARGA KHUSUS DARI KELUARGA YANG LOGIN INI
+            $kepalaKeluarga = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
+                ->where('hubungan', 'Kepala Keluarga')
+                ->first();
 
             $riwayatSingkat = Presensi::with('anggotaKeluarga')
                 ->where('id_keluarga', $keluarga->id_keluarga)
@@ -37,8 +44,7 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
         }
-
-        return view('user.dashboard', compact('keluarga', 'anggota', 'riwayatSingkat', 'sholatAktif'));
+        return view('user.dashboard', compact('keluarga', 'anggota', 'kepalaKeluarga', 'riwayatSingkat', 'sholatAktif'));
     }
 
     public function storeAnggota(Request $request)
