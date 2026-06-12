@@ -75,15 +75,15 @@
 
     <div class="py-4" x-data="{
             modalOpen: false,
-            modalEditKeluarga: false,
+            modalEditAnggota: false,
             namaAnggota: '',
             targetFormId: '',
             previewDepan: null,
-            editKeluargaData: { id: '', nama: '' },
+            editAnggotaData: { id: '', nama: '' },
 
-            openEditKeluarga(id, nama) {
-                this.editKeluargaData = { id: id, nama: nama };
-                this.modalEditKeluarga = true;
+            openEditAnggota(id, nama) {
+                this.editAnggotaData = { id: id, nama: nama };
+                this.modalEditAnggota = true;
             },
 
             confirmDeleteKeluarga(id, nama) {
@@ -171,13 +171,6 @@
                                     <h4 class="text-xs font-bold text-gray-800 dark:text-white uppercase truncate">{{ $keluarga->nama_keluarga }}</h4>
                                 </div>
                                 <div class="flex gap-1.5 shrink-0">
-                                    {{-- Tombol Edit Nama Keluarga --}}
-                                    <button @click="openEditKeluarga('{{ $keluarga->id_keluarga }}', '{{ $keluarga->nama_keluarga }}')"
-                                            class="p-2 text-blue-500 bg-blue-50 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
-                                        </svg>
-                                    </button>
                                     {{-- Tombol Hapus Keluarga --}}
                                     <form id="delete-keluarga-form-{{ $keluarga->id_keluarga }}"
                                           action="{{ route('admin.keluarga.destroy', $keluarga->id_keluarga) }}"
@@ -231,7 +224,13 @@
 
                                         {{-- Tombol Aksi --}}
                                         <div class="flex items-center gap-1 shrink-0">
-
+                                            <button type="button" @click="openEditAnggota('{{ $person->id_anggota_keluarga }}', '{{ $person->nama_anggota }}')"
+                                                    class="p-1.5 text-blue-500 bg-blue-50 rounded-lg hover:bg-blue-600 hover:text-white transition-all shadow-sm"
+                                                    title="Edit Nama Anggota">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                                                </svg>
+                                            </button>
                                             {{-- ✅ FORM REGISTRASI WAJAH (DIPERBAIKI) --}}
                                             <form id="form-face-{{ $person->id_anggota_keluarga }}"
                                                   action="{{ route('admin.register.update', $person->id_anggota_keluarga) }}"
@@ -290,22 +289,24 @@
         </div>
 
         {{-- ═══════════════════════════════════════════════════════
-             MODAL EDIT NAMA KELUARGA
+        MODAL EDIT NAMA ANGGOTA KELUARGA (UPDATED)
         ═══════════════════════════════════════════════════════ --}}
-        <div x-show="modalEditKeluarga" x-cloak
-             class="fixed inset-0 z-[120] flex items-center justify-center p-4">
-            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="modalEditKeluarga = false"></div>
+        <div x-show="modalEditAnggota" x-cloak
+            class="fixed inset-0 z-[120] flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" @click="modalEditAnggota = false"></div>
             <div class="bg-white dark:bg-[#1e1e1e] rounded-[2rem] p-8 w-full max-w-sm relative z-[130] border border-white/10 shadow-2xl">
-                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2 uppercase tracking-tighter">Edit Nama Keluarga</h3>
-                <form :action="'{{ url('admin/keluarga') }}/' + editKeluargaData.id" method="POST" class="space-y-4">
-                    @csrf @method('PUT')
+                <h3 class="text-xl font-bold text-gray-800 dark:text-white mb-2 uppercase tracking-tighter">Edit Nama Anggota</h3>
+                
+               <form :action="'/admin/anggota/' + editAnggotaData.id" method="POST" class="space-y-4">
+                    @csrf 
+                    @method('PUT')
                     <div>
-                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Nama Keluarga</label>
-                        <input type="text" name="nama_keluarga" x-model="editKeluargaData.nama" required
-                               class="w-full mt-2 bg-gray-50 dark:bg-black/20 border-none rounded-2xl py-4 px-6 text-gray-800 dark:text-white focus:ring-emerald-500 transition-all shadow-inner">
+                        <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest ml-2">Nama Lengkap Jamaah</label>
+                        <input type="text" name="nama_anggota" x-model="editAnggotaData.nama" required
+                            class="w-full mt-2 bg-gray-50 dark:bg-black/20 border-none rounded-2xl py-4 px-6 text-gray-800 dark:text-white focus:ring-emerald-500 transition-all shadow-inner">
                     </div>
                     <div class="flex gap-3 pt-2">
-                        <button type="button" @click="modalEditKeluarga = false"
+                        <button type="button" @click="modalEditAnggota = false"
                                 class="flex-1 py-4 text-gray-400 font-bold text-xs uppercase tracking-widest">
                             Batal
                         </button>
