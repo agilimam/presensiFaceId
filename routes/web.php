@@ -39,6 +39,7 @@ Route::middleware(['auth'])->group(function () {
         // Rute Update & Hapus Register Wajah
         Route::post('/admin/register/update/{id}', [RegisterController::class, 'updateFace'])->name('admin.register.update');
         Route::delete('/admin/register/destroy/{id}', [RegisterController::class, 'destroyFace'])->name('admin.register.destroyFace');
+        Route::put('/admin/anggota/{id}', [RegisterController::class, 'updateAnggota'])->name('admin.anggota.update');
         Route::delete('/admin/presensi/{id}', [AdminPresensi::class, 'destroy'])->name('admin.presensi.destroy');
     });
 
