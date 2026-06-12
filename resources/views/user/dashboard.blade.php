@@ -45,11 +45,9 @@
     }">
 
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-            {{-- SECTION TOP --}}
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
 
-                {{-- CARD KIRI --}}
+                {{-- CARD KIRI (SUDAH DIPERBAIKI) --}}
                 <div class="lg:col-span-2 flex">
                     <div class="bg-white dark:bg-[#212121] rounded-[2.5rem] p-8 border border-gray-200 dark:border-white/5 shadow-sm overflow-hidden relative group transition-colors w-full h-full">
 
@@ -59,8 +57,7 @@
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 bg-emerald-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-emerald-500/20">
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                                     </svg>
                                 </div>
 
@@ -68,23 +65,15 @@
                                     <p class="text-[10px] font-black text-emerald-600 uppercase tracking-widest leading-none mb-1">
                                         Waktu Sholat Aktif
                                     </p>
-
                                     <h4 class="text-xl font-black text-gray-900 dark:text-white uppercase leading-tight">
                                         {{ $sholatAktif['nama'] }}
                                     </h4>
-
                                     <div class="flex items-center gap-1.5 mt-1.5">
-                                        <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        <svg class="w-3 h-3 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
-
                                         <p class="text-[9px] font-bold text-gray-500 dark:text-emerald-500/60 uppercase tracking-tight transition-colors">
-                                            Tepat Waktu:
-                                            <span class="text-emerald-600 dark:text-emerald-400">
-                                                {{ $sholatAktif['range'] }}
-                                            </span>
+                                            Tepat Waktu: <span class="text-emerald-600 dark:text-emerald-400">{{ $sholatAktif['range'] }}</span>
                                         </p>
                                     </div>
                                 </div>
@@ -94,11 +83,8 @@
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1 transition-colors">
                                     Status
                                 </p>
-
                                 <span class="px-3 py-1 rounded-lg text-xs font-black uppercase 
-                                    {{ $sholatAktif['status'] == 'Terlambat'
-                                        ? 'bg-rose-100 text-rose-600 shadow-sm shadow-rose-500/10'
-                                        : 'bg-emerald-100 text-emerald-600 shadow-sm shadow-emerald-500/10' }}">
+                                    {{ $sholatAktif['status'] == 'Terlambat' ? 'bg-rose-100 text-rose-600 shadow-sm shadow-rose-500/10' : 'bg-emerald-100 text-emerald-600 shadow-sm shadow-emerald-500/10' }}">
                                     {{ $sholatAktif['status'] }}
                                 </span>
                             </div>
@@ -109,9 +95,8 @@
                                 <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1 transition-colors">
                                     Kepala Keluarga
                                 </p>
-
                                 <p class="text-xl font-black text-gray-900 dark:text-white leading-tight uppercase truncate transition-colors">
-                                    {{ $keluarga->nama_keluarga ?? 'Data Kosong' }}
+                                    {{ $kepalaKeluarga ? $kepalaKeluarga->nama_anggota : 'Belum Diatur' }}
                                 </p>
                             </div>
                         </div>
