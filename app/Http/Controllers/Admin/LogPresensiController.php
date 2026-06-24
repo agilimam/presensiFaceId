@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Presensi; 
 use App\Models\anggotaKeluarga; 
 use Carbon\Carbon;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class LogPresensiController extends Controller
 {
@@ -26,9 +27,18 @@ class LogPresensiController extends Controller
             })
             ->get();
 
+        // FIX #1: Filter berdasarkan sesi sholat yang dipilih (kalau ada)
         $logsRaw = Presensi::with('anggotaKeluarga')
             ->whereDate('waktu_absen', $tanggalPilihan)
+            ->when($sesiSholatPilihan, function ($query) use ($sesiSholatPilihan) {
+                return $query->where('keterangan_sholat', $sesiSholatPilihan);
+            })
             ->get();
+
+        // Daftar sesi yang perlu dihitung: kalau ada filter, cuma sesi itu saja
+        $daftarSesi = $sesiSholatPilihan
+            ? [$sesiSholatPilihan]
+            : ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
 
         $rekapKeluarga = [];
 
@@ -46,20 +56,35 @@ class LogPresensiController extends Controller
                 'Maghrib' => null,
                 'Isya'    => null,
             ];
-            foreach (['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'] as $sesi) {
+
+            foreach ($daftarSesi as $sesi) {
                 $absenSesi = $absenKeluargaIni->where('keterangan_sholat', $sesi)->sortBy('waktu_absen');
                 if ($absenSesi->isNotEmpty()) {
                     $logPertama = $absenSesi->first();
+
+                    // FIX #2: Dedup jamaah yang hadir per id_anggota_keluarga
+                    // supaya 1 orang yang absen 2x di sesi yang sama tidak terhitung dobel
                     $semuaYangHadir = [];
+                    $idAnggotaSudahDicatat = [];
+
                     foreach ($absenSesi as $log) {
                         if ($log->anggotaKeluarga) {
+                            $idAnggota = $log->anggotaKeluarga->id_anggota_keluarga;
+
+                            if (in_array($idAnggota, $idAnggotaSudahDicatat)) {
+                                continue; // sudah dicatat sebelumnya, skip
+                            }
+
                             $semuaYangHadir[] = [
                                 'nama' => $log->anggotaKeluarga->nama_anggota,
                                 'jam'  => Carbon::parse($log->waktu_absen)->format('H:i'),
                                 'status' => $log->status
                             ];
+
+                            $idAnggotaSudahDicatat[] = $idAnggota;
                         }
                     }
+
                     $rekapKeluarga[$idKeluarga][$sesi] = [
                         'status_utama' => $logPertama->status, 
                         'jam_pertama'  => Carbon::parse($logPertama->waktu_absen)->format('H:i'),
@@ -68,12 +93,31 @@ class LogPresensiController extends Controller
                 }
             }
         }
+
         uasort($rekapKeluarga, function ($a, $b) {
-        return strtotime($b['last_absen'] ?? '1970-01-01')
-        <=> strtotime($a['last_absen'] ?? '1970-01-01');
-    });
-    return view('admin.log_presensi.index', compact('rekapKeluarga', 'tanggalPilihan', 'sesiSholatPilihan'));
-}
+            return strtotime($b['last_absen'] ?? '1970-01-01') 
+                 <=> strtotime($a['last_absen'] ?? '1970-01-01');
+        });
+
+        // 2. Sekarang buat Paginator di luar fungsi uasort
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 9; 
+        
+        // Ambil potongan data untuk halaman saat ini
+        $currentPageItems = array_slice($rekapKeluarga, ($currentPage - 1) * $perPage, $perPage);
+
+        // Buat objek Paginator
+        $rekapKeluargaPaginator = new LengthAwarePaginator(
+            $currentPageItems, 
+            count($rekapKeluarga), 
+            $perPage, 
+            $currentPage, 
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
+        // 3. Kirim ke view
+        return view('admin.log_presensi.index', compact('rekapKeluargaPaginator', 'tanggalPilihan', 'sesiSholatPilihan'));
+    }
 
     public function exportPdf(Request $request)
 {
