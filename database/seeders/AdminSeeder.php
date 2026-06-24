@@ -3,8 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
@@ -13,10 +13,14 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        user::create([
-            'username' => 'admin',
-            'password' => bcrypt('admin123'), 
-            'role' => 'admin', 
-        ]);
+        // Pakai updateOrCreate: Kalau admin sudah ada, dia bakal update.
+        // Kalau belum ada, dia bakal buat baru. Aman!
+        User::updateOrCreate(
+            ['username' => 'admin'], // Kunci pencariannya
+            [
+                'password' => Hash::make('admin123'), // Hash::make lebih standar Laravel
+                'role'     => 'admin', 
+            ]
+        );
     }
 }
