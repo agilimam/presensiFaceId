@@ -52,20 +52,6 @@ class DashboardController extends Controller
             })
             ->count();
 
-       
-        // 4. LEADERBOARD ISTIQOMAH — 7 Hari Terakhir
-        $topDisiplin = DB::table('presensi')
-            ->join('keluarga', 'presensi.id_keluarga', '=', 'keluarga.id_keluarga')
-            ->where('presensi.waktu_absen', '>=', Carbon::now('Asia/Jakarta')->subDays(7)->startOfDay())
-            ->select(
-                'keluarga.id_keluarga',
-                'keluarga.nama_keluarga',
-                DB::raw('COUNT(DISTINCT DATE(presensi.waktu_absen), presensi.keterangan_sholat) as skor_istiqomah')
-            )
-            ->groupBy('keluarga.id_keluarga', 'keluarga.nama_keluarga')
-            ->orderBy('skor_istiqomah', 'desc')
-            ->limit(5)
-            ->get();
 
         return view('admin.dashboard', compact(
             'totalKeluarga',
@@ -75,11 +61,8 @@ class DashboardController extends Controller
             'chartData',
             'jumlahKeluargaAktif',
             'keluargaFullSesiHariIni',
-            'topDisiplin'
+
         ));
-
-
-        
     }
     public function cleanStorage()
     {
