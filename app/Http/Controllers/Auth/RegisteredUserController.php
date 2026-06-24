@@ -36,6 +36,8 @@ class RegisteredUserController extends Controller
         'nama_keluarga' => ['required', 'string', 'max:255'],
         'nik' => ['required', 'string', 'max:16', 'unique:keluarga'], 
         'password' => ['required', 'confirmed', Rules\Password::defaults()],
+    ],[
+        'password.confirmed'=>'kata sandi tidak cocok dengan password yang dimasukkan',
     ]);
 
     $user = DB::transaction(function () use ($request) {
