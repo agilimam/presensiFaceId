@@ -27,7 +27,8 @@ class KeluargaController extends Controller
                 });
         })
         ->orderBy('id_keluarga', 'asc')
-        ->get();
+        ->paginate(9)
+        ->withQueryString();
 
         return view('admin.data_keluarga.index', compact(
             'daftarKeluarga',
@@ -67,7 +68,8 @@ class KeluargaController extends Controller
                              });
             })
             ->orderBy('username', 'asc') 
-            ->get();
+            ->paginate(9)
+            ->withQueryString();
 
         return view('admin.manajemen_akun.index', compact('daftarAkun', 'search'));
     }
