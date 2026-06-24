@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\keluarga; 
 use App\Models\User;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class KeluargaController extends Controller
 {
@@ -50,23 +53,81 @@ class KeluargaController extends Controller
             return redirect()->back()->with('error', 'Gagal memperbarui data: ' . $e->getMessage());
         }
     }
-    public function destroy($id)
+
+    public function indexAkun(Request $request)
     {
+        $search = $request->search;
+
+        $daftarAkun = User::with('keluarga')
+            ->where('role', 'keluarga')
+            ->when($search, function ($query) use ($search) {
+                return $query->where('username', 'like', "%{$search}%")
+                             ->orWhereHas('keluarga', function ($q) use ($search) {
+                                 $q->where('nama_keluarga', 'like', "%{$search}%");
+                             });
+            })
+            ->orderBy('username', 'asc') 
+            ->get();
+
+        return view('admin.manajemen_akun.index', compact('daftarAkun', 'search'));
+    }
+
+    /**
+     * Memproses Perubahan Password dari Modal (Mencari berdasarkan USERNAME)
+     */
+    public function updatePassword(Request $request, $username): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'password.required' => 'Kolom password baru wajib diisi.',
+            'password.min' => 'Password minimal harus terdiri dari 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+        ]);
+
         try {
-            $keluarga = keluarga::findOrFail($id);
-            $userId = $keluarga->id_user;
+            $user = User::where('username', $username)->firstOrFail();
+            $user->update([
+                'password' => Hash::make($request->password),
+            ]);
 
-            // 1. Hapus data keluarga
-            $keluarga->delete();
+            return redirect()->back()->with('success', 'Password akun keluarga ' . $user->username . ' berhasil diperbarui!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memperbarui password: ' . $e->getMessage());
+        }
+    }
 
-            // 2. Hapus akun user terkait di tabel users agar sinkron
-            if ($userId) {
-                User::where('id_user', $userId)->delete();
+    /**
+     * Menghapus Akun beserta Seluruh Data Keluarga & Anggota yang Terhubung
+     */
+    public function destroyAkun($username): RedirectResponse
+    {
+        DB::beginTransaction();
+
+        try {
+            // 1. Cari user berdasarkan username
+            $user = User::where('username', $username)->firstOrFail();
+
+            // 2. Cari data keluarga fisik yang memiliki hubungan/relasi ke user ini
+            $dataKeluarga = keluarga::where('id_user', $user->id_user ?? $user->id)->first();
+
+            if ($dataKeluarga) {
+                // 3. Hapus semua anggota keluarga terlebih dahulu yang terikat dengan id_keluarga ini
+                $dataKeluarga->anggotaKeluarga()->delete(); 
+                
+                // 4. Hapus data induk keluarga fisik
+                $dataKeluarga->delete();
             }
 
-            return redirect()->route('admin.keluarga.index')->with('success', 'Keluarga dan akun user berhasil dihapus!');
+            // 5. Terakhir, hapus data akun login (User)
+            $user->delete();
+
+            DB::commit();
+
+            return redirect()->back()->with('success', 'Akun ' . $username . ' beserta seluruh data keluarga dan anggotanya berhasil dihapus permanen!');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal hapus data.');
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Gagal menghapus akun dan data terkait: ' . $e->getMessage());
         }
     }
 }
