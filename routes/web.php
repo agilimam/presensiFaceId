@@ -30,11 +30,13 @@ Route::middleware(['auth'])->group(function () {
         Route::post('/admin/clean-storage', [AdminController::class, 'cleanStorage'])->name('admin.clean.storage');
         Route::get('admin/log-presensi/export', [AdminPresensi::class, 'exportPdf'])->name('admin.presensi.export');
         
-        // --- ROUTE MANAJEMEN KELUARGA (ADMIN) ---
+        // --- ROUTE MANAJEMEN KELUARGA 
         Route::get('/admin/keluarga', [KeluargaController::class, 'index'])->name('admin.keluarga.index');
         Route::put('/admin/keluarga/{id}', [KeluargaController::class, 'update'])->name('admin.keluarga.update');
         Route::delete('/admin/keluarga/{id}', [KeluargaController::class, 'destroy'])->name('admin.keluarga.destroy');
-        // ----------------------------------------
+        Route::get('/admin/manajemen-akun', [KeluargaController::class, 'indexAkun'])->name('admin.akun.index');
+        Route::put('/admin/akun/{username}/update-password', [KeluargaController::class, 'updatePassword'])->name('admin.akun.update-password');
+        Route::delete('/admin/akun/{username}', [KeluargaController::class, 'destroyAkun'])->name('admin.akun.destroy');
         
         // Rute Update & Hapus Register Wajah
         Route::post('/admin/register/update/{id}', [RegisterController::class, 'updateFace'])->name('admin.register.update');
