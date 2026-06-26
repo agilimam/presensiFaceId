@@ -86,26 +86,6 @@
                 this.modalEditAnggota = true;
             },
 
-            confirmDeleteKeluarga(id, nama) {
-                Swal.fire({
-                    title: 'Hapus Keluarga?',
-                    text: 'Keluarga ' + nama + ' beserta seluruh anggotanya akan dihapus permanen!',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#ef4444',
-                    cancelButtonColor: '#6b7280',
-                    confirmButtonText: 'Ya, Hapus Semua!',
-                    cancelButtonText: 'Batal',
-                    background: document.documentElement.classList.contains('dark') ? '#212121' : '#fff',
-                    color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
-                    customClass: { popup: 'rounded-[2rem]' }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('delete-keluarga-form-' + id).submit();
-                    }
-                });
-            },
-
             confirmResetFace(id, nama) {
                 Swal.fire({
                     title: 'Reset Wajah?',
@@ -169,21 +149,6 @@
                                 <div class="min-w-0 flex-1">
                                     <p class="text-[7px] text-emerald-600 uppercase tracking-widest font-black">Keluarga</p>
                                     <h4 class="text-xs font-bold text-gray-800 dark:text-white uppercase truncate">{{ $keluarga->nama_keluarga }}</h4>
-                                </div>
-                                <div class="flex gap-1.5 shrink-0">
-                                    {{-- Tombol Hapus Keluarga --}}
-                                    <form id="delete-keluarga-form-{{ $keluarga->id_keluarga }}"
-                                          action="{{ route('admin.keluarga.destroy', $keluarga->id_keluarga) }}"
-                                          method="POST" class="inline">
-                                        @csrf @method('DELETE')
-                                        <button type="button"
-                                                @click="confirmDeleteKeluarga('{{ $keluarga->id_keluarga }}', '{{ $keluarga->nama_keluarga }}')"
-                                                class="p-2 text-red-500 bg-red-50 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm">
-                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                            </svg>
-                                        </button>
-                                    </form>
                                 </div>
                             </div>
 
@@ -285,6 +250,11 @@
                 @empty
                     <div class="col-span-full text-center py-10 text-gray-400">Belum ada data keluarga.</div>
                 @endforelse
+            </div>
+
+            {{-- PAGINATION LINKS --}}
+            <div class="mt-6">
+                {{ $daftarKeluarga->links() }}
             </div>
         </div>
 
