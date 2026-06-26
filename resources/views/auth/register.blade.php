@@ -1,116 +1,110 @@
 <x-guest-layout>
-    <div class="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-[#0a0a0a] p-4 py-12">
+    <div class="min-h-screen flex items-center justify-center bg-emerald-800 p-4 font-sans">
         
-        <!-- Header Section -->
-        <div class="mb-8 text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-emerald-600 rounded-2xl shadow-xl shadow-emerald-500/20 mb-4">
-                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-            </div>
-            <h2 class="text-3xl font-black tracking-tighter text-gray-900 dark:text-white">Daftar Akun</h2>
-            <p class="text-emerald-600 font-bold uppercase tracking-widest text-xs mt-1">Jamaah Masjid Al-Iman</p>
-        </div>
-
-        <!-- Registration Card -->
-        <div class="w-full max-w-lg bg-white dark:bg-[#161615] border border-gray-200 dark:border-white/10 rounded-[2rem] p-8 shadow-2xl relative">
+        <!-- Main Split Card Container (Persegi Panjang Simetris & Proporsional) -->
+        <div class="w-full max-w-4xl bg-white rounded-[2.5rem] shadow-2xl flex flex-col md:flex-row items-stretch overflow-hidden">
             
-            <form method="POST" action="{{ route('register') }}" class="space-y-5">
-                @csrf
-
-                <!-- Username -->
-                <div>
-                    <label for="username" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                        {{ __('Username') }}
-                    </label>
-                    <input id="username" 
-                        class="block w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-emerald-500 focus:bg-white dark:focus:bg-[#1c1c1b] focus:ring-4 focus:ring-emerald-500/10 transition duration-200 text-sm dark:text-white" 
-                        type="text" 
-                        name="username" 
-                        :value="old('username')" 
-                        required 
-                        autofocus 
-                        placeholder="Contoh: ahmad_user" />
-                    <x-input-error :messages="$errors->get('username')" class="mt-2 text-xs font-semibold text-red-500" />
+            <!-- Sisi Kiri: Form Pendaftaran -->
+            <div class="w-full md:w-1/2 p-10 md:p-12 flex flex-col justify-center bg-white">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-extrabold text-gray-800 tracking-tight">Daftar Akun</h2>
+                    <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold mt-1">Lengkapi Data Pendaftaran Keluarga</p>
                 </div>
 
-                <!-- Nama Keluarga -->
-                <div>
-                    <label for="nama_keluarga" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                        {{ __('Nama Keluarga (Kepala Keluarga)') }}
-                    </label>
-                    <input id="nama_keluarga" 
-                        class="block w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-emerald-500 focus:bg-white dark:focus:bg-[#1c1c1b] focus:ring-4 focus:ring-emerald-500/10 transition duration-200 text-sm dark:text-white" 
-                        type="text" 
-                        name="nama_keluarga" 
-                        :value="old('nama_keluarga')" 
-                        required 
-                        placeholder="Nama lengkap kepala keluarga" />
-                    <x-input-error :messages="$errors->get('nama_keluarga')" class="mt-2 text-xs font-semibold text-red-500" />
-                </div>
+                <form method="POST" action="{{ route('register') }}" class="space-y-5">
+                    @csrf
 
-                <!-- NIK -->
-                <div>
-                    <label for="nik" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                        {{ __('NIK (Sesuai KTP)') }}
-                    </label>
-                    <input id="nik" 
-                        class="block w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-emerald-500 focus:bg-white dark:focus:bg-[#1c1c1b] focus:ring-4 focus:ring-emerald-500/10 transition duration-200 text-sm dark:text-white" 
-                        type="text" 
-                        name="nik" 
-                        :value="old('nik')" 
-                        required 
-                        placeholder="16 Digit NIK" />
-                    <x-input-error :messages="$errors->get('nik')" class="mt-2 text-xs font-semibold text-red-500" />
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <!-- Password -->
-                    <div>
-                        <label for="password" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                            {{ __('Password') }}
-                        </label>
-                        <input id="password" 
-                            class="block w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-emerald-500 focus:bg-white dark:focus:bg-[#1c1c1b] focus:ring-4 focus:ring-emerald-500/10 transition duration-200 text-sm dark:text-white"
-                            type="password"
-                            name="password"
+                    <!-- Username Input -->
+                    <div class="relative">
+                        <input id="username" 
+                            class="block w-full px-0 py-2 bg-transparent border-b-2 border-gray-200 focus:border-emerald-500 focus:ring-0 transition duration-200 text-sm text-gray-800 placeholder-gray-400" 
+                            type="text" 
+                            name="username" 
+                            value="{{ old('username') }}" 
                             required 
-                            autocomplete="new-password"
-                            placeholder="••••••••" />
-                        <x-input-error :messages="$errors->get('password')" class="mt-2 text-xs font-semibold text-red-500" />
+                            autofocus 
+                            placeholder="Username" />
+                        <x-input-error :messages="$errors->get('username')" class="mt-1 text-[11px] font-semibold text-red-500" />
                     </div>
 
-                    <!-- Confirm Password -->
-                    <div>
-                        <label for="password_confirmation" class="block text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2 ml-1">
-                            {{ __('Konfirmasi') }}
-                        </label>
-                        <input id="password_confirmation" 
-                            class="block w-full px-4 py-3 rounded-xl bg-gray-50 dark:bg-white/5 border-transparent focus:border-emerald-500 focus:bg-white dark:focus:bg-[#1c1c1b] focus:ring-4 focus:ring-emerald-500/10 transition duration-200 text-sm dark:text-white"
-                            type="password"
-                            name="password_confirmation"
+                    <!-- Nama Kepala Keluarga Input -->
+                    <div class="relative">
+                        <input id="nama_keluarga" 
+                            class="block w-full px-0 py-2 bg-transparent border-b-2 border-gray-200 focus:border-emerald-500 focus:ring-0 transition duration-200 text-sm text-gray-800 placeholder-gray-400" 
+                            type="text" 
+                            name="nama_keluarga" 
+                            value="{{ old('nama_keluarga') }}" 
                             required 
-                            placeholder="••••••••" />
+                            placeholder="Nama Lengkap (Kepala Keluarga)" />
+                        <x-input-error :messages="$errors->get('nama_keluarga')" class="mt-1 text-[11px] font-semibold text-red-500" />
                     </div>
+
+                    <!-- NIK Input -->
+                    <div class="relative">
+                        <input id="nik" 
+                            class="block w-full px-0 py-2 bg-transparent border-b-2 border-gray-200 focus:border-emerald-500 focus:ring-0 transition duration-200 text-sm text-gray-800 placeholder-gray-400" 
+                            type="text" 
+                            name="nik" 
+                            value="{{ old('nik') }}" 
+                            required 
+                            placeholder="NIK (Sesuai KTP 16 Digit)" />
+                        <x-input-error :messages="$errors->get('nik')" class="mt-1 text-[11px] font-semibold text-red-500" />
+                    </div>
+
+                    <!-- Password Fields Grid -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div class="relative">
+                            <input id="password" 
+                                class="block w-full px-0 py-2 bg-transparent border-b-2 border-gray-200 focus:border-emerald-500 focus:ring-0 transition duration-200 text-sm text-gray-800 placeholder-gray-400"
+                                type="password"
+                                name="password"
+                                required 
+                                autocomplete="new-password"
+                                placeholder="Password" />
+                            <x-input-error :messages="$errors->get('password')" class="mt-1 text-[11px] font-semibold text-red-500" />
+                        </div>
+
+                        <div class="relative">
+                            <input id="password_confirmation" 
+                                class="block w-full px-0 py-2 bg-transparent border-b-2 border-gray-200 focus:border-emerald-500 focus:ring-0 transition duration-200 text-sm text-gray-800 placeholder-gray-400"
+                                type="password"
+                                name="password_confirmation"
+                                required 
+                                placeholder="Konfirmasi Password" />
+                            <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1 text-[11px] font-semibold text-red-500" />
+                        </div>
+                    </div>
+
+                    <!-- Button Action -->
+                    <div class="pt-2">
+                        <button type="submit" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-full font-bold text-xs tracking-wider uppercase shadow-lg shadow-emerald-600/20 transform active:scale-[0.99] transition-all duration-200">
+                            {{ __('Buat Akun Baru') }}
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Sisi Kanan: Panel Info (Tinggi Otomatis Mengikuti Sisi Kiri) -->
+            <div class="w-full md:w-1/2 bg-emerald-50/50 p-10 md:p-12 flex flex-col items-center justify-center text-center border-t md:border-t-0 md:border-l border-gray-100/80">
+                
+                <!-- Circular Icon / Logo Box Layout -->
+                <div class="w-20 h-20 bg-white rounded-2xl shadow-xl shadow-emerald-900/5 flex items-center justify-center p-4 mb-5 border border-emerald-100/50">
+                    <svg class="w-10 h-10 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
                 </div>
 
-                <!-- Action Section -->
-                <div class="pt-4 space-y-4">
-                    <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-sm shadow-xl shadow-emerald-500/20 transform active:scale-[0.98] transition-all duration-200">
-                        {{ __('DAFTAR AKUN KELUARGA') }}
-                    </button>
+                <h3 class="text-lg font-extrabold text-gray-800 tracking-tight mb-2">Sudah Terdaftar?</h3>
+                <p class="text-xs text-gray-400 max-w-xs leading-relaxed mb-6">
+                    Silakan masuk menggunakan akun Anda untuk mengakses sistem monitoring dan manajemen kehadiran.
+                </p>
 
-                    <div class="text-center">
-                        <a class="text-xs font-bold text-gray-500 dark:text-gray-400 hover:text-emerald-600 transition underline decoration-2 underline-offset-4" href="{{ route('login') }}">
-                            Sudah punya akun? Masuk di sini
-                        </a>
-                    </div>
-                </div>
-            </form>
+                <!-- Outlined Action Button -->
+                <a href="{{ route('login') }}" class="inline-block px-8 py-2.5 border-2 border-emerald-600 hover:bg-emerald-600 text-emerald-600 hover:text-white rounded-full font-bold text-xs tracking-wider uppercase transition-all duration-200">
+                    {{ __('Masuk Ke Portal') }}
+                </a>
+            </div>
+
         </div>
-
-        <p class="mt-8 text-xs text-gray-400 font-medium">
-            &copy; {{ date('Y') }} Masjid Al-Iman — Yogyakarta
-        </p>
     </div>
 </x-guest-layout>
