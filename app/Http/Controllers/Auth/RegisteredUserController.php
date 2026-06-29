@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\AnggotaKeluarga;
 use App\Models\Keluarga;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
@@ -14,6 +15,7 @@ use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\DB;
+
 
 class RegisteredUserController extends Controller
 {
@@ -40,9 +42,8 @@ class RegisteredUserController extends Controller
         'password.confirmed'=>'kata sandi tidak cocok dengan password yang dimasukkan',
     ]);
 
-    $user = DB::transaction(function () use ($request) {
+        $user = DB::transaction(function () use ($request) {
         // 1. Simpan ke tabel User
-        // Gunakan variabel lokal agar ID-nya pasti tertangkap
         $createdUser = User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
@@ -50,14 +51,21 @@ class RegisteredUserController extends Controller
         ]);
 
         // 2. Simpan ke tabel Keluarga
-        // Pastikan menggunakan $createdUser->id
-        Keluarga::create([
+        $createdKeluarga = Keluarga::create([
             'id_user' => $createdUser->id_user, 
             'nama_keluarga' => $request->nama_keluarga,
             'nik' => $request->nik,
         ]);
 
-        return $createdUser;
+        // 3. Tambahkan otomatis ke tabel AnggotaKeluarga sebagai Kepala Keluarga
+        AnggotaKeluarga::create([
+            'id_keluarga' => $createdKeluarga->id_keluarga, // Ambil ID dari hasil insert keluarga
+            'nama_anggota' => $request->nama_keluarga,      // Ambil dari input
+            'hubungan' => 'Kepala Keluarga',                // Set otomatis
+            'status_wajah' => 'Belum Scan',                 // Default status
+        ]);
+
+    return $createdUser;
     });
 
     event(new Registered($user));

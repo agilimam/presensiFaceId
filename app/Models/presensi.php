@@ -29,10 +29,10 @@ class presensi extends Model
     public static function getSesiSekarang()
     {
         $now = Carbon::now('Asia/Jakarta');
-        // Menghitung total menit dari jam 00:00
+       
         $totalMenit = (int)$now->format('H') * 60 + (int)$now->format('i');
 
-        // Definisi Jam Azan & Batas Tepat Waktu (dalam menit dari jam 00:00)
+       
         $waktu = [
             'Subuh'   => ['azan' => 4*60+21,  'tepat' => 5*60+41,  'label' => '04:21 - 05:41'],   
             'Dzuhur'  => ['azan' => 11*60+35, 'tepat' => 12*60+55, 'label' => '11:35 - 12:55'],  
@@ -41,7 +41,7 @@ class presensi extends Model
             'Isya'    => ['azan' => 18*60+41, 'tepat' => 19*60+11, 'label' => '18:41 - 19:11'],  
         ];
 
-        // 1. Tentukan Sesi
+      
         if ($totalMenit >= $waktu['Isya']['azan'] || $totalMenit < $waktu['Subuh']['azan']) {
             $sesi = 'Isya';
         } elseif ($totalMenit >= $waktu['Subuh']['azan'] && $totalMenit < $waktu['Dzuhur']['azan']) {
@@ -54,17 +54,17 @@ class presensi extends Model
             $sesi = 'Maghrib';
         }
 
-        // 2. Logika Cek Status (Perbaikan Khusus Isya melewati tengah malam)
+       
         if ($sesi === 'Isya') {
-            // Jika jam sekarang antara 00:00 sampai 04:21 (Subuh)
+         
             if ($totalMenit < $waktu['Subuh']['azan']) {
                 $status = 'Terlambat';
             } else {
-                // Jika jam sekarang antara 18:41 sampai 23:59
+               
                 $status = ($totalMenit <= $waktu['Isya']['tepat']) ? 'Tepat Waktu' : 'Terlambat';
             }
         } else {
-            // Logika untuk sesi sholat selain Isya
+            
             $status = ($totalMenit <= $waktu[$sesi]['tepat']) ? 'Tepat Waktu' : 'Terlambat';
         }
 

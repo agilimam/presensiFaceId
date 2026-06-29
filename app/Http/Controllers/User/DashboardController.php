@@ -17,7 +17,7 @@ class DashboardController extends Controller
     {
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
         $anggota = [];
-        $kepalaKeluarga = null; // Tambahkan inisialisasi variabel ini
+        $kepalaKeluarga = null; 
         $riwayatSingkat = [];
         
         $dataSesi = Presensi::getSesiSekarang();
@@ -28,12 +28,12 @@ class DashboardController extends Controller
         ];
         
         if ($keluarga) {
-            // 1. Ambil seluruh anggota keluarga (Urutan: Kepala Keluarga -> Ibu -> Anak)
+        
             $anggota = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->orderByRaw("FIELD(hubungan, 'Kepala Keluarga', 'Ibu', 'Anak') ASC")
                 ->get();
 
-            // 2. AMBIL DATA KEPALA KELUARGA KHUSUS DARI KELUARGA YANG LOGIN INI
+        
             $kepalaKeluarga = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->where('hubungan', 'Kepala Keluarga')
                 ->first();
@@ -57,7 +57,7 @@ class DashboardController extends Controller
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
 
         if ($keluarga) {
-            // 1. CEK NAMA SAMA (Validasi agar nama tidak duplikat di satu keluarga)
+   
             $namaExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->where('nama_anggota', $request->nama_anggota)
                 ->exists();
@@ -66,7 +66,7 @@ class DashboardController extends Controller
                 return back()->with('error', "Gagal! Nama '{$request->nama_anggota}' sudah terdaftar di keluarga Anda.");
             }
 
-            // 2. CEK PERAN GANDA (Kepala Keluarga/Ibu tidak boleh dua)
+           
             if (in_array($request->hubungan, ['Kepala Keluarga', 'Ibu'])) {
                 $roleExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                     ->where('hubungan', $request->hubungan)
@@ -100,18 +100,18 @@ class DashboardController extends Controller
         $anggota = AnggotaKeluarga::findOrFail($id);
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
 
-        // 1. CEK NAMA SAMA SAAT UPDATE
+    
         $namaExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
             ->where('nama_anggota', $request->nama_anggota)
-            ->where('id_anggota_keluarga', '!=', $id) // Abaikan id diri sendiri
+            ->where('id_anggota_keluarga', '!=', $id) 
             ->exists();
 
-        // Contoh di storeAnggota atau update
+      
         if ($namaExists) {
             return back()->with('error', "Gagal! Nama " . $request->nama_anggota . " sudah terdaftar di keluarga Anda.");
         }
 
-        // 2. CEK PERAN GANDA SAAT UPDATE
+        
         if (in_array($request->hubungan, ['Kepala Keluarga', 'Ibu'])) {
             $roleExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->where('hubungan', $request->hubungan)

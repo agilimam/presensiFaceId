@@ -27,7 +27,7 @@ class LogPresensiController extends Controller
             })
             ->get();
 
-        // FIX #1: Filter berdasarkan sesi sholat yang dipilih (kalau ada)
+       
         $logsRaw = Presensi::with('anggotaKeluarga')
             ->whereDate('waktu_absen', $tanggalPilihan)
             ->when($sesiSholatPilihan, function ($query) use ($sesiSholatPilihan) {
@@ -35,7 +35,7 @@ class LogPresensiController extends Controller
             })
             ->get();
 
-        // Daftar sesi yang perlu dihitung: kalau ada filter, cuma sesi itu saja
+        
         $daftarSesi = $sesiSholatPilihan
             ? [$sesiSholatPilihan]
             : ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
@@ -62,8 +62,6 @@ class LogPresensiController extends Controller
                 if ($absenSesi->isNotEmpty()) {
                     $logPertama = $absenSesi->first();
 
-                    // FIX #2: Dedup jamaah yang hadir per id_anggota_keluarga
-                    // supaya 1 orang yang absen 2x di sesi yang sama tidak terhitung dobel
                     $semuaYangHadir = [];
                     $idAnggotaSudahDicatat = [];
 
@@ -72,7 +70,7 @@ class LogPresensiController extends Controller
                             $idAnggota = $log->anggotaKeluarga->id_anggota_keluarga;
 
                             if (in_array($idAnggota, $idAnggotaSudahDicatat)) {
-                                continue; // sudah dicatat sebelumnya, skip
+                                continue;
                             }
 
                             $semuaYangHadir[] = [
@@ -99,14 +97,14 @@ class LogPresensiController extends Controller
                  <=> strtotime($a['last_absen'] ?? '1970-01-01');
         });
 
-        // 2. Sekarang buat Paginator di luar fungsi uasort
+        
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 9; 
         
-        // Ambil potongan data untuk halaman saat ini
+        
         $currentPageItems = array_slice($rekapKeluarga, ($currentPage - 1) * $perPage, $perPage);
 
-        // Buat objek Paginator
+        
         $rekapKeluargaPaginator = new LengthAwarePaginator(
             $currentPageItems, 
             count($rekapKeluarga), 
@@ -115,7 +113,7 @@ class LogPresensiController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        // 3. Kirim ke view
+        
         return view('admin.log_presensi.index', compact('rekapKeluargaPaginator', 'tanggalPilihan', 'sesiSholatPilihan'));
     }
 
@@ -136,7 +134,7 @@ class LogPresensiController extends Controller
         ->orderBy('waktu_absen', 'asc')
         ->get();
 
-    // KELOMPOKKAN DATA BERDASARKAN TANGGAL DULU
+   
     $rekapPerTanggal = $logsRaw->groupBy(function($item) {
         return Carbon::parse($item->waktu_absen)->format('Y-m-d');
     });

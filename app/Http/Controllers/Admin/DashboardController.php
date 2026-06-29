@@ -17,16 +17,12 @@ class DashboardController extends Controller
         $hari_ini = Carbon::today('Asia/Jakarta');
         $kemarin  = Carbon::yesterday('Asia/Jakarta');
 
-        // ─────────────────────────────────────────────────────────────────
-        // 1. STATISTIK UTAMA
-        // ─────────────────────────────────────────────────────────────────
+    
         $totalKeluarga   = keluarga::count();
         $totalAnggota    = anggotaKeluarga::count();
         $presensiHariIni = presensi::whereDate('waktu_absen', $hari_ini)->count();
 
-        // ─────────────────────────────────────────────────────────────────
-        // 2. DATA GRAFIK — Tren per sesi HARI INI
-        // ─────────────────────────────────────────────────────────────────
+        
         $daftarSholat = ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
 
         $absenHariIniRaw = presensi::whereDate('waktu_absen', $hari_ini)->get();
@@ -36,17 +32,15 @@ class DashboardController extends Controller
             $chartData[] = $absenHariIniRaw->where('keterangan_sholat', $sholat)->count();
         }
 
-      
-        // 3. STATISTIK KELUARGA — dihitung dari HARI INI
+    
         $jumlahKeluargaAktif = presensi::whereDate('waktu_absen', $hari_ini)
             ->distinct('id_keluarga')
             ->count('id_keluarga');
 
-        // Jumlah keluarga yang hadir lengkap 5 waktu hari ini
-        // → cukup 1 anggota yang absen per sesi, keluarga sudah dihitung
+
         $keluargaFullSesiHariIni = presensi::whereDate('waktu_absen', $hari_ini)
             ->get()
-            ->groupBy('id_keluarga')                   // kelompokkan per keluarga
+            ->groupBy('id_keluarga')                   
             ->filter(function ($logs) {
                 return $logs->pluck('keterangan_sholat')->unique()->count() >= 5;
             })

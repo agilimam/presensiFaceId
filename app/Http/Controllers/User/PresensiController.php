@@ -31,7 +31,7 @@ class PresensiController extends Controller
             $infoSesi = Presensi::getSesiSekarang(); 
             $now = Carbon::now('Asia/Jakarta');
 
-            // --- SIMPAN SCAN ---
+            
             $imageName = 'SCAN_' . $user->id_user . '_' . $now->timestamp . '.jpg';
             Storage::disk('public')->put('scan_masuk/' . $imageName, base64_decode(str_replace(['data:image/jpeg;base64,', ' '], ['', '+'], $request->image)));
 
@@ -44,11 +44,11 @@ class PresensiController extends Controller
                 'face_id'             => $imageName,
             ]);
 
-            // TUNGGU AI (5 Detik)
+           
             sleep(5); 
-            $presensi->refresh(); // Ambil data terbaru dari DB
+            $presensi->refresh();
 
-            // JIKA SUKSES (ID Anggota terisi)
+  
             if ($presensi->id_anggota_keluarga !== null && $presensi->id_anggota_keluarga > 0) {
                 return response()->json([
                     'success' => true, 
@@ -56,7 +56,7 @@ class PresensiController extends Controller
                 ]);
             }
 
-            // JIKA GAGAL (Apapun alasannya: Wajah asing, blur, atau AI crash)
+            
             if (Storage::disk('public')->exists('scan_masuk/' . $imageName)) {
                 Storage::disk('public')->delete('scan_masuk/' . $imageName);
             }

@@ -74,9 +74,7 @@ class KeluargaController extends Controller
         return view('admin.manajemen_akun.index', compact('daftarAkun', 'search'));
     }
 
-    /**
-     * Memproses Perubahan Password dari Modal (Mencari berdasarkan USERNAME)
-     */
+    
     public function updatePassword(Request $request, $username): RedirectResponse
     {
         $request->validate([
@@ -99,29 +97,27 @@ class KeluargaController extends Controller
         }
     }
 
-    /**
-     * Menghapus Akun beserta Seluruh Data Keluarga & Anggota yang Terhubung
-     */
+    
     public function destroyAkun($username): RedirectResponse
     {
         DB::beginTransaction();
 
         try {
-            // 1. Cari user berdasarkan username
+         
             $user = User::where('username', $username)->firstOrFail();
 
-            // 2. Cari data keluarga fisik yang memiliki hubungan/relasi ke user ini
+         
             $dataKeluarga = keluarga::where('id_user', $user->id_user ?? $user->id)->first();
 
             if ($dataKeluarga) {
-                // 3. Hapus semua anggota keluarga terlebih dahulu yang terikat dengan id_keluarga ini
+            
                 $dataKeluarga->anggotaKeluarga()->delete(); 
                 
-                // 4. Hapus data induk keluarga fisik
+            
                 $dataKeluarga->delete();
             }
 
-            // 5. Terakhir, hapus data akun login (User)
+          
             $user->delete();
 
             DB::commit();
