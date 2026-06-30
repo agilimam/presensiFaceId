@@ -18,7 +18,7 @@ class PresensiController extends Controller
         return view('user.index'); 
     }
 
-  public function scan(Request $request)
+    public function scan(Request $request)
     {
         $user = Auth::user();
         $keluarga = Keluarga::where('id_user', $user->id_user)->first();
@@ -30,7 +30,6 @@ class PresensiController extends Controller
         try {
             $infoSesi = Presensi::getSesiSekarang(); 
             $now = Carbon::now('Asia/Jakarta');
-
             
             $imageName = 'SCAN_' . $user->id_user . '_' . $now->timestamp . '.jpg';
             Storage::disk('public')->put('scan_masuk/' . $imageName, base64_decode(str_replace(['data:image/jpeg;base64,', ' '], ['', '+'], $request->image)));
@@ -44,19 +43,35 @@ class PresensiController extends Controller
                 'face_id'             => $imageName,
             ]);
 
-           
             sleep(5); 
             $presensi->refresh();
 
-  
             if ($presensi->id_anggota_keluarga !== null && $presensi->id_anggota_keluarga > 0) {
+                
+                // VALIDASI ABSENSI GANDA
+                $sudahAbsen = Presensi::where('id_anggota_keluarga', $presensi->id_anggota_keluarga)
+                    ->where('keterangan_sholat', $infoSesi['nama'])
+                    ->whereDate('waktu_absen', Carbon::today())
+                    ->where('id_presensi', '!=', $presensi->id_presensi) 
+                    ->exists();
+
+                if ($sudahAbsen) {
+                    $presensi->delete();
+                    if (Storage::disk('public')->exists('scan_masuk/' . $imageName)) {
+                        Storage::disk('public')->delete('scan_masuk/' . $imageName);
+                    }
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Anda sudah melakukan absensi untuk sholat ' . $infoSesi['nama'] . ' hari ini.'
+                    ]);
+                }
+
                 return response()->json([
                     'success' => true, 
                     'message' => 'Berhasil! Kehadiran ' . $infoSesi['nama'] . ' telah dicatat.'
                 ]);
             }
 
-            
             if (Storage::disk('public')->exists('scan_masuk/' . $imageName)) {
                 Storage::disk('public')->delete('scan_masuk/' . $imageName);
             }
