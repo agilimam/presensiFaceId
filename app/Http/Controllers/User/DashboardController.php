@@ -49,15 +49,18 @@ class DashboardController extends Controller
 
     public function storeAnggota(Request $request)
     {
+        
         $request->validate([
-            'nama_anggota' => 'required|string|max:255',
+            'nama_anggota' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s\.]+$/'],
             'hubungan' => 'required',
+        ],[
+            'nama_anggota.regex' => 'Nama anggota hanya boleh mengandung huruf, spasi, dan titik.',
         ]);
 
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
 
         if ($keluarga) {
-   
+      
             $namaExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->where('nama_anggota', $request->nama_anggota)
                 ->exists();
@@ -66,7 +69,6 @@ class DashboardController extends Controller
                 return back()->with('error', "Gagal! Nama '{$request->nama_anggota}' sudah terdaftar di keluarga Anda.");
             }
 
-           
             if (in_array($request->hubungan, ['Kepala Keluarga', 'Ibu'])) {
                 $roleExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                     ->where('hubungan', $request->hubungan)
@@ -92,25 +94,23 @@ class DashboardController extends Controller
 
     public function update(Request $request, $id)
     {
+        // 1. PERBAIKAN: Ubah validasi menjadi 'nama_anggota'
         $request->validate([
-            'nama_anggota' => 'required|string|max:255',
+            'nama_anggota' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s\.]+$/'],
             'hubungan' => 'required',
         ]);
 
         $anggota = AnggotaKeluarga::findOrFail($id);
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
-
-    
+        
         $namaExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
-            ->where('nama_anggota', $request->nama_anggota)
+            ->where('nama_anggota', $request->nama_anggota) // Sudah sinkron
             ->where('id_anggota_keluarga', '!=', $id) 
             ->exists();
-
-      
+        
         if ($namaExists) {
             return back()->with('error', "Gagal! Nama " . $request->nama_anggota . " sudah terdaftar di keluarga Anda.");
         }
-
         
         if (in_array($request->hubungan, ['Kepala Keluarga', 'Ibu'])) {
             $roleExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
