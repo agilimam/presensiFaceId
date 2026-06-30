@@ -334,7 +334,6 @@
                         <select name="hubungan" required
                             class="w-full mt-2 bg-gray-50 dark:bg-black/20 border-none rounded-2xl py-4 px-6 text-gray-800 dark:text-white transition-all shadow-inner">
 
-                            <option value="Kepala Keluarga">Kepala Keluarga</option>
                             <option value="Ibu">Ibu</option>
                             <option value="Anak">Anak</option>
 
@@ -358,6 +357,7 @@
                 </form>
             </div>
         </div>
+        
 
         {{-- MODAL EDIT --}}
         <div x-show="openEdit" x-cloak class="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -420,23 +420,40 @@
 
     </div>
 
+    {{-- NOTIFIKASI VALIDASI ERROR (BARU) --}}
+    @if($errors->any())
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Kesalahan Validasi!',
+                text: '{{ $errors->first() }}',
+                confirmButtonColor: '#ef4444',
+                background: document.documentElement.classList.contains('dark') ? '#1e1e1e' : '#fff',
+                color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
+            });
+        </script>
+    @endif
+
     {{-- NOTIFIKASI BERHASIL --}}
     @if(session('success'))
         <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'BERHASIL!',
-                    text: "{{ session('success') }}",
-                    confirmButtonColor: '#059669',
-                    confirmButtonText: 'OKE',
-                    background: document.documentElement.classList.contains('dark') ? '#1e1e1e' : '#fff',
-                    color: document.documentElement.classList.contains('dark') ? '#fff' : '#000',
-                    customClass: {
-                        popup: 'rounded-[2.5rem] border border-white/10 shadow-2xl',
-                        confirmButton: 'rounded-xl px-10 py-3 font-bold uppercase text-xs tracking-widest shadow-lg shadow-emerald-500/20'
-                    }
-                });
+            Swal.fire({
+                icon: 'success',
+                title: 'BERHASIL!',
+                text: "{{ session('success') }}",
+                confirmButtonColor: '#059669',
+            });
+        </script>
+    @endif
+
+    {{-- NOTIFIKASI ERROR SESI --}}
+    @if(session('error'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'PERHATIAN!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#ef4444',
             });
         </script>
     @endif
