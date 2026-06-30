@@ -43,26 +43,25 @@ class RegisteredUserController extends Controller
     ]);
 
         $user = DB::transaction(function () use ($request) {
-        // 1. Simpan ke tabel User
+       
         $createdUser = User::create([
             'username' => $request->username,
             'password' => Hash::make($request->password),
             'role' => 'keluarga',
         ]);
 
-        // 2. Simpan ke tabel Keluarga
+       
         $createdKeluarga = Keluarga::create([
             'id_user' => $createdUser->id_user, 
             'nama_keluarga' => $request->nama_keluarga,
             'nik' => $request->nik,
         ]);
 
-        // 3. Tambahkan otomatis ke tabel AnggotaKeluarga sebagai Kepala Keluarga
+        
         AnggotaKeluarga::create([
-            'id_keluarga' => $createdKeluarga->id_keluarga, // Ambil ID dari hasil insert keluarga
-            'nama_anggota' => $request->nama_keluarga,      // Ambil dari input
-            'hubungan' => 'Kepala Keluarga',                // Set otomatis
-            'status_wajah' => 'Belum Scan',                 // Default status
+            'id_keluarga' => $createdKeluarga->id_keluarga, 
+            'nama_anggota' => $request->nama_keluarga,      
+            'hubungan' => 'Kepala Keluarga',               
         ]);
 
     return $createdUser;
