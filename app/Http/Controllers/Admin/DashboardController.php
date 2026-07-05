@@ -58,23 +58,4 @@ class DashboardController extends Controller
 
         ));
     }
-    public function cleanStorage()
-    {
-        try {
-            $logs  = \App\Models\Presensi::where('face_id', 'LIKE', '%.jpg%')->get();
-            $count = 0;
-
-            foreach ($logs as $log) {
-                if (\Illuminate\Support\Facades\Storage::disk('public')->exists('scan_masuk/' . $log->face_id)) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete('scan_masuk/' . $log->face_id);
-                    $log->update(['face_id' => 'Diverifikasi']);
-                    $count++;
-                }
-            }
-
-            return redirect()->back()->with('success', "Berhasil! $count berkas scan telah dibersihkan.");
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal membersihkan storage: ' . $e->getMessage());
-        }
-    }
 }
