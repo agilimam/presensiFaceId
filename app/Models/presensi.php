@@ -21,6 +21,11 @@ class presensi extends Model
         'status',
     ];
 
+    public function keluarga()
+    {
+        return $this->belongsTo(Keluarga::class,'id_keluarga','id_keluarga');
+    }
+
     public function anggotaKeluarga()
     {
         return $this->belongsTo(AnggotaKeluarga::class, 'id_anggota_keluarga', 'id_anggota_keluarga');

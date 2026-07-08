@@ -21,4 +21,8 @@ class anggotaKeluarga extends Model
     {
         return $this->belongsTo(Keluarga::class, 'id_keluarga', 'id_keluarga');
     }
+    public function presensi()
+    {
+        return $this->hasMany(Presensi::class, 'id_anggota_keluarga', 'id_anggota_keluarga');
+    }
 }
