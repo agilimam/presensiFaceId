@@ -12,7 +12,7 @@ class User extends Authenticatable
     protected $fillable = [
         'username',
         'password',
-        'role',
+        'role'
     ];
 
     protected $hidden = [
@@ -27,17 +27,11 @@ class User extends Authenticatable
         ];
     }
 
-    /**
-     * Relasi ke tabel Keluarga (One-to-One)
-     */
     public function keluarga()
     {
         return $this->hasOne(Keluarga::class, 'id_user', 'id_user');
     }
 
-    /**
-     * Helper untuk cek role di Controller/Middleware
-     */
     public function isAdmin()
     {
         return $this->role === 'admin';

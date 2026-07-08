@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
        Schema::create('presensi', function (Blueprint $table) {
-    $table->id('id_presensi'); // Primary Key
+    $table->id('id_presensi'); 
 
-    // Foreign Key ke tabel keluarga (Harus ada/Not Null)
+    
     $table->foreignId('id_keluarga')
           ->constrained('keluarga', 'id_keluarga')
           ->onDelete('cascade');
 
-    // Foreign Key ke anggota_keluarga (Dibuat NULLABLE agar AI bisa update nanti)
+   
     $table->unsignedBigInteger('id_anggota_keluarga')->nullable();
     $table->foreign('id_anggota_keluarga')
           ->references('id_anggota_keluarga')
@@ -29,7 +29,7 @@ return new class extends Migration
     $table->string('keterangan_sholat');
     $table->dateTime('waktu_absen');
     $table->string('face_id')->nullable();
-    $table->string('status')->nullable(); // Untuk menyimpan nama file foto hasil scan
+    $table->string('status')->nullable(); 
     });
     }
 
