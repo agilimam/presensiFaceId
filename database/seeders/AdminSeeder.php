@@ -13,12 +13,11 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        // Pakai updateOrCreate: Kalau admin sudah ada, dia bakal update.
-        // Kalau belum ada, dia bakal buat baru. Aman!
+    
         User::updateOrCreate(
-            ['username' => 'admin'], // Kunci pencariannya
+            ['username' => 'admin'], 
             [
-                'password' => Hash::make('admin123'), // Hash::make lebih standar Laravel
+                'password' => Hash::make('admin123'), 
                 'role'     => 'admin', 
             ]
         );
