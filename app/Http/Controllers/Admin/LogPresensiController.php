@@ -13,8 +13,7 @@ class LogPresensiController extends Controller
 {
     public function index(Request $request)
     {
-        
-        $tanggalPilihan = $request->get('date', Carbon::today()->format('Y-m-d'));
+        $tanggalPilihan = $request->get('date', Carbon::today('Asia/Jakarta')->format('Y-m-d'));
         $sesiSholatPilihan = $request->get('sholat'); 
 
         $daftarKeluarga = anggotaKeluarga::with('keluarga')
@@ -27,7 +26,6 @@ class LogPresensiController extends Controller
             })
             ->get();
 
-       
         $logsRaw = Presensi::with('anggotaKeluarga')
             ->whereDate('waktu_absen', $tanggalPilihan)
             ->when($sesiSholatPilihan, function ($query) use ($sesiSholatPilihan) {
@@ -35,7 +33,18 @@ class LogPresensiController extends Controller
             })
             ->get();
 
-        
+        $hariIniStr = Carbon::today('Asia/Jakarta')->format('Y-m-d');
+        $now        = Carbon::now('Asia/Jakarta');
+        $jadwal     = Presensi::getJadwalSholat();
+        $subuhAzanHariIni = Carbon::today('Asia/Jakarta')->addMinutes($jadwal['Subuh']['azan']);
+
+        if ($tanggalPilihan === $hariIniStr && $now->gte($subuhAzanHariIni)) {
+            $logsRaw = $logsRaw->reject(function ($item) use ($subuhAzanHariIni) {
+                return $item->keterangan_sholat === 'Isya'
+                    && Carbon::parse($item->waktu_absen)->lt($subuhAzanHariIni);
+            });
+        }
+
         $daftarSesi = $sesiSholatPilihan
             ? [$sesiSholatPilihan]
             : ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
@@ -97,14 +106,11 @@ class LogPresensiController extends Controller
                  <=> strtotime($a['last_absen'] ?? '1970-01-01');
         });
 
-        
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $perPage = 9; 
         
-        
         $currentPageItems = array_slice($rekapKeluarga, ($currentPage - 1) * $perPage, $perPage);
 
-        
         $rekapKeluargaPaginator = new LengthAwarePaginator(
             $currentPageItems, 
             count($rekapKeluarga), 
@@ -113,12 +119,12 @@ class LogPresensiController extends Controller
             ['path' => $request->url(), 'query' => $request->query()]
         );
 
-        
         return view('admin.log_presensi.index', compact('rekapKeluargaPaginator', 'tanggalPilihan', 'sesiSholatPilihan'));
     }
 
     public function exportPdf(Request $request)
     {
+
         $startDate = $request->get('date_start', Carbon::today()->format('Y-m-d'));
         $endDate = $request->get('date_end', $startDate);
 
@@ -137,7 +143,6 @@ class LogPresensiController extends Controller
         ->orderBy('waktu_absen', 'asc')
         ->get();
 
-    
         $rekapPerTanggal = $logsRaw->groupBy(function($item) {
             return Carbon::parse($item->waktu_absen)->format('Y-m-d');
         });

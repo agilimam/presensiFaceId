@@ -15,37 +15,43 @@ class DashboardController extends Controller
     public function index()
     {
         $hari_ini = Carbon::today('Asia/Jakarta');
+        $now      = Carbon::now('Asia/Jakarta');
         $kemarin  = Carbon::yesterday('Asia/Jakarta');
 
-    
-        $totalKeluarga   = keluarga::count();
-        $totalAnggota    = anggotaKeluarga::count();
-        $presensiHariIni = presensi::whereDate('waktu_absen', $hari_ini)->count();
+        $totalKeluarga = keluarga::count();
+        $totalAnggota  = anggotaKeluarga::count();
 
-        
         $daftarSholat = ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
 
+   
         $absenHariIniRaw = presensi::whereDate('waktu_absen', $hari_ini)->get();
+
+    
+        $jadwal = presensi::getJadwalSholat();
+        $subuhAzanHariIni = $hari_ini->copy()->addMinutes($jadwal['Subuh']['azan']);
+
+        if ($now->gte($subuhAzanHariIni)) {
+            $absenHariIniRaw = $absenHariIniRaw->reject(function ($item) use ($subuhAzanHariIni) {
+                return $item->keterangan_sholat === 'Isya'
+                    && Carbon::parse($item->waktu_absen)->lt($subuhAzanHariIni);
+            });
+        }
+
+        $presensiHariIni = $absenHariIniRaw->count();
 
         $chartData = [];
         foreach ($daftarSholat as $sholat) {
             $chartData[] = $absenHariIniRaw->where('keterangan_sholat', $sholat)->count();
         }
 
-    
-        $jumlahKeluargaAktif = presensi::whereDate('waktu_absen', $hari_ini)
-            ->distinct('id_keluarga')
-            ->count('id_keluarga');
+        $jumlahKeluargaAktif = $absenHariIniRaw->pluck('id_keluarga')->unique()->count();
 
-
-        $keluargaFullSesiHariIni = presensi::whereDate('waktu_absen', $hari_ini)
-            ->get()
-            ->groupBy('id_keluarga')                   
+        $keluargaFullSesiHariIni = $absenHariIniRaw
+            ->groupBy('id_keluarga')
             ->filter(function ($logs) {
                 return $logs->pluck('keterangan_sholat')->unique()->count() >= 5;
             })
             ->count();
-
 
         return view('admin.dashboard', compact(
             'totalKeluarga',
@@ -55,7 +61,6 @@ class DashboardController extends Controller
             'chartData',
             'jumlahKeluargaAktif',
             'keluargaFullSesiHariIni',
-
         ));
     }
 }
