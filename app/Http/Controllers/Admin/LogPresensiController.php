@@ -118,31 +118,34 @@ class LogPresensiController extends Controller
     }
 
     public function exportPdf(Request $request)
-{
-    $startDate = $request->get('date_start', Carbon::today()->format('Y-m-d'));
-    $endDate = $request->get('date_end', $startDate);
+    {
+        $startDate = $request->get('date_start', Carbon::today()->format('Y-m-d'));
+        $endDate = $request->get('date_end', $startDate);
 
-    $start = Carbon::parse($startDate)->startOfDay();
-    $end = Carbon::parse($endDate)->endOfDay();
-    
-    $labelTanggal = ($startDate == $endDate) 
-        ? Carbon::parse($startDate)->translatedFormat('d F Y')
-        : Carbon::parse($startDate)->translatedFormat('d M') . ' - ' . Carbon::parse($endDate)->translatedFormat('d M Y');
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate)->endOfDay();
+        
+        $labelTanggal = ($startDate == $endDate) 
+            ? Carbon::parse($startDate)->translatedFormat('d F Y')
+            : Carbon::parse($startDate)->translatedFormat('d M') . ' - ' . Carbon::parse($endDate)->translatedFormat('d M Y');
 
-    $logsRaw = Presensi::with(['anggotaKeluarga', 'anggotaKeluarga.keluarga'])
+        $logsRaw = Presensi::with([
+        'anggotaKeluarga',
+        'anggotaKeluarga.keluarga.anggotaKeluarga'
+        ])
         ->whereBetween('waktu_absen', [$start, $end])
         ->orderBy('waktu_absen', 'asc')
         ->get();
 
-   
-    $rekapPerTanggal = $logsRaw->groupBy(function($item) {
-        return Carbon::parse($item->waktu_absen)->format('Y-m-d');
-    });
-
-    $dompdf = app('dompdf.wrapper');
-    $html = view('admin.log_presensi.cetak_pdf', compact('rekapPerTanggal', 'labelTanggal'))->render();
     
-    $dompdf->loadHTML($html)->setPaper('a4', 'landscape');
-    return $dompdf->stream();
+        $rekapPerTanggal = $logsRaw->groupBy(function($item) {
+            return Carbon::parse($item->waktu_absen)->format('Y-m-d');
+        });
+
+        $dompdf = app('dompdf.wrapper');
+        $html = view('admin.log_presensi.cetak_pdf', compact('rekapPerTanggal', 'labelTanggal'))->render();
+        
+        $dompdf->loadHTML($html)->setPaper('a4', 'landscape');
+        return $dompdf->stream();
     }
 }
