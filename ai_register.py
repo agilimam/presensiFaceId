@@ -3,7 +3,6 @@ import face_recognition
 import os
 import time
 
-# KONFIGURASI PATH (Sesuaikan dengan folder storage kamu)
 BASE_DIR = r"D:\laragon\www\presensiFaceId"
 PATH_FACES = os.path.join(BASE_DIR, "storage/app/public/faces")
 
@@ -27,17 +26,17 @@ def cek_duplikasi():
         
         path_baru = os.path.join(PATH_FACES, p['face_id'])
         
-        # 1. Cek file ada atau tidak
+
         if not os.path.exists(path_baru):
             cursor.execute("UPDATE anggota_keluarga SET status_wajah = 'GAGAL' WHERE id_anggota_keluarga = %s", (p['id_anggota_keluarga'],))
             db.commit()
             continue
         
-        # 2. Coba proses loading wajah
+        #Mendeteksi apakah ada wajah
         try:
             img_baru = face_recognition.load_image_file(path_baru)
             enc_baru = face_recognition.face_encodings(img_baru)
-
+        #wajah tidak terdeteksi
             if not enc_baru:
                 raise Exception("Wajah tidak terdeteksi")
         except Exception as e:
@@ -48,7 +47,7 @@ def cek_duplikasi():
             db.commit()
             continue
 
-        # 3. Bandingkan dengan yang sudah VERIFIED
+
         cursor.execute("SELECT id_anggota_keluarga, face_id FROM anggota_keluarga WHERE status_wajah = 'VERIFIED' AND id_anggota_keluarga != %s", (p['id_anggota_keluarga'],))
         existings = cursor.fetchall()
         
@@ -60,6 +59,7 @@ def cek_duplikasi():
             img_exist = face_recognition.load_image_file(path_exist)
             enc_exist = face_recognition.face_encodings(img_exist)
             
+            #Membandingkan dua wajah
             if enc_exist:
                 match = face_recognition.compare_faces([enc_exist[0]], enc_baru[0], tolerance=0.45)
                 if match[0]:
@@ -67,7 +67,7 @@ def cek_duplikasi():
                     is_duplicate = True
                     break
         
-        # 4. Update Status (Berada di dalam loop for p in pendings)
+
         if is_duplicate:
             print(f"⚠️ Wajah duplikat, menghapus file {p['face_id']}")
             if os.path.exists(path_baru):
