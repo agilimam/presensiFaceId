@@ -11,7 +11,7 @@
                 Master Data Jadwal Sholat
             </h3>
             <p class="text-sm text-gray-500 mt-1">
-                Jadwal 5 waktu sholat bersifat tetap. Admin hanya dapat mengubah jam pelaksanaan.
+               Admin hanya dapat mengubah jam pelaksanaan.
             </p>
         </div>
 
@@ -115,10 +115,6 @@
 
     </div>
 
-    {{-- ========================= --}}
-    {{-- MODAL EDIT --}}
-    {{-- ========================= --}}
-
     @foreach($jadwal as $item)
 
     <div id="modalEdit{{ $item->id_jadwal }}" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
@@ -218,30 +214,19 @@
                 color: document.documentElement.classList.contains('dark') ? '#fff' : '#000'
             };
         }
-
-        // =========================
-        // OPEN MODAL
-        // =========================
         function openModal(id) {
 
             const modal = document.getElementById(id);
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-
             setTimeout(() => {
 
                 modal.firstElementChild.classList.remove('scale-95','opacity-0');
                 modal.firstElementChild.classList.add('scale-100','opacity-100');
 
             },20);
-
         }
-
-        // =========================
-        // CLOSE MODAL
-        // =========================
-
         function forceCloseModal(id){
 
             const modal=document.getElementById(id);

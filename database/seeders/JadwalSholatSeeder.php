@@ -7,11 +7,7 @@ use App\Models\JadwalSholat;
 
 class JadwalSholatSeeder extends Seeder
 {
-    /**
-     * Seed 5 data jadwal sholat wajib (master data tetap).
-     * Jalankan sekali: php artisan db:seed --class=JadwalSholatSeeder
-     * Jam di bawah ini contoh, silakan sesuaikan dengan jadwal asli lokasi kamu.
-     */
+
     public function run(): void
     {
         $data = [

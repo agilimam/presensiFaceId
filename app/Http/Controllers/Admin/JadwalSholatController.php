@@ -8,10 +8,7 @@ use App\Models\JadwalSholat;
 
 class JadwalSholatController extends Controller
 {
-    /**
-     * Urutan tampil sesuai urutan waktu sholat (bukan abjad / jam mulai),
-     * supaya kartu selalu tampil: Subuh, Dzuhur, Ashar, Maghrib, Isya.
-     */
+    
     private const URUTAN_SHOLAT = ['Subuh', 'Zuhur', 'Ashar', 'Magrib', 'Isya'];
 
     public function index()
@@ -28,20 +25,26 @@ class JadwalSholatController extends Controller
         return view('admin.jadwal_sholat.index', compact('jadwal'));
     }
 
-    /**
-     * Hanya jam_mulai dan batas_tepat_waktu yang bisa diubah.
-     * nama_sholat sengaja tidak divalidasi/diupdate dari sini karena
-     * data jadwal sholat bersifat master data tetap (5 waktu wajib).
-     */
-    public function update(Request $request, $id)
+   public function update(Request $request, $id)
     {
         $validated = $request->validate([
             'jam_mulai' => 'required|date_format:H:i',
-            'batas_tepat_waktu' => 'required|date_format:H:i|after:jam_mulai',
+            'batas_tepat_waktu' => 'required|date_format:H:i',
         ]);
 
         $jadwal = JadwalSholat::findOrFail($id);
-        $jadwal->update($validated);
+        if (
+            strtolower($jadwal->nama_sholat) != 'isya' &&
+            strtotime($validated['batas_tepat_waktu']) <= strtotime($validated['jam_mulai'])
+        ) {
+            return back()->withErrors([
+                'batas_tepat_waktu' => 'Batas tepat waktu harus setelah jam mulai.'
+            ])->withInput();
+        }
+        $jadwal->update([
+            'jam_mulai' => $validated['jam_mulai'],
+            'batas_tepat_waktu' => $validated['batas_tepat_waktu'],
+        ]);
 
         return back()->with('success', 'Jadwal ' . $jadwal->nama_sholat . ' berhasil diperbarui.');
     }

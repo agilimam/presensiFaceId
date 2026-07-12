@@ -9,31 +9,59 @@ use App\Models\AnggotaKeluarga;
 use App\Models\Presensi;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-   public function index()
+    public function index()
     {
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
+
         $anggota = [];
-        $kepalaKeluarga = null; 
+        $kepalaKeluarga = null;
         $riwayatSingkat = [];
-        
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil sesi sholat dari Model Presensi
+        |--------------------------------------------------------------------------
+        */
         $dataSesi = Presensi::getSesiSekarang();
-        $sholatAktif = [
-            'nama' => strtoupper($dataSesi['nama']),
-            'status' => $dataSesi['status'],
-            'range' => $dataSesi['range']
-        ];
-        
+
+        if ($dataSesi) {
+
+            $sholatAktif = [
+                'nama'   => strtoupper($dataSesi['nama']),
+                'status' => $dataSesi['status'],
+                'range'  => $dataSesi['range'],
+            ];
+
+        } else {
+
+            $sholatAktif = [
+                'nama'   => 'BELUM MASUK WAKTU',
+                'status' => '-',
+                'range'  => '-',
+            ];
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Data keluarga
+        |--------------------------------------------------------------------------
+        */
         if ($keluarga) {
-        
+
             $anggota = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
-                ->orderByRaw("FIELD(hubungan, 'Kepala Keluarga', 'Ibu', 'Anak') ASC")
+                ->orderByRaw("
+                    FIELD(
+                        hubungan,
+                        'Kepala Keluarga',
+                        'Ibu',
+                        'Anak'
+                    )
+                ")
                 ->get();
 
-        
             $kepalaKeluarga = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->where('hubungan', 'Kepala Keluarga')
                 ->first();
@@ -44,38 +72,56 @@ class DashboardController extends Controller
                 ->take(5)
                 ->get();
         }
-        return view('user.dashboard', compact('keluarga', 'anggota', 'kepalaKeluarga', 'riwayatSingkat', 'sholatAktif'));
+
+        return view('user.dashboard', compact(
+            'keluarga',
+            'anggota',
+            'kepalaKeluarga',
+            'riwayatSingkat',
+            'sholatAktif'
+        ));
     }
 
     public function storeAnggota(Request $request)
     {
-        
         $request->validate([
-            'nama_anggota' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s\.]+$/'],
+            'nama_anggota' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z\s\.]+$/'
+            ],
             'hubungan' => 'required',
-        ],[
+        ], [
             'nama_anggota.regex' => 'Nama anggota hanya boleh mengandung huruf, spasi, dan titik.',
         ]);
 
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
 
         if ($keluarga) {
-      
+
             $namaExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->where('nama_anggota', $request->nama_anggota)
                 ->exists();
 
             if ($namaExists) {
-                return back()->with('error', "Gagal! Nama '{$request->nama_anggota}' sudah terdaftar di keluarga Anda.");
+                return back()->with(
+                    'error',
+                    "Gagal! Nama '{$request->nama_anggota}' sudah terdaftar di keluarga Anda."
+                );
             }
 
             if (in_array($request->hubungan, ['Kepala Keluarga', 'Ibu'])) {
+
                 $roleExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                     ->where('hubungan', $request->hubungan)
                     ->exists();
 
                 if ($roleExists) {
-                    return back()->with('error', "Gagal! Peran {$request->hubungan} sudah terdaftar dalam keluarga ini.");
+                    return back()->with(
+                        'error',
+                        "Gagal! Peran {$request->hubungan} sudah terdaftar dalam keluarga ini."
+                    );
                 }
             }
 
@@ -83,7 +129,7 @@ class DashboardController extends Controller
                 'id_keluarga' => $keluarga->id_keluarga,
                 'nama_anggota' => $request->nama_anggota,
                 'hubungan' => $request->hubungan,
-                'face_id' => null, 
+                'face_id' => null,
             ]);
 
             return back()->with('success', 'Anggota berhasil ditambahkan!');
@@ -94,32 +140,44 @@ class DashboardController extends Controller
 
     public function update(Request $request, $id)
     {
-        // 1. PERBAIKAN: Ubah validasi menjadi 'nama_anggota'
         $request->validate([
-            'nama_anggota' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s\.]+$/'],
+            'nama_anggota' => [
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[a-zA-Z\s\.]+$/'
+            ],
             'hubungan' => 'required',
         ]);
 
         $anggota = AnggotaKeluarga::findOrFail($id);
+
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
-        
+
         $namaExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
-            ->where('nama_anggota', $request->nama_anggota) // Sudah sinkron
-            ->where('id_anggota_keluarga', '!=', $id) 
+            ->where('nama_anggota', $request->nama_anggota)
+            ->where('id_anggota_keluarga', '!=', $id)
             ->exists();
-        
+
         if ($namaExists) {
-            return back()->with('error', "Gagal! Nama " . $request->nama_anggota . " sudah terdaftar di keluarga Anda.");
+            return back()->with(
+                'error',
+                "Gagal! Nama {$request->nama_anggota} sudah terdaftar di keluarga Anda."
+            );
         }
-        
+
         if (in_array($request->hubungan, ['Kepala Keluarga', 'Ibu'])) {
+
             $roleExists = AnggotaKeluarga::where('id_keluarga', $keluarga->id_keluarga)
                 ->where('hubungan', $request->hubungan)
                 ->where('id_anggota_keluarga', '!=', $id)
                 ->exists();
 
             if ($roleExists) {
-                return back()->with('error', "Gagal! Peran {$request->hubungan} sudah ada di anggota lain.");
+                return back()->with(
+                    'error',
+                    "Gagal! Peran {$request->hubungan} sudah ada di anggota lain."
+                );
             }
         }
 
@@ -134,6 +192,7 @@ class DashboardController extends Controller
     public function destroy($id)
     {
         $anggota = AnggotaKeluarga::findOrFail($id);
+
         $keluarga = Keluarga::where('id_user', Auth::id())->first();
 
         if ($anggota->id_keluarga != $keluarga->id_keluarga) {
@@ -145,6 +204,7 @@ class DashboardController extends Controller
         }
 
         $anggota->delete();
+
         return back()->with('success', 'Anggota keluarga berhasil dihapus!');
     }
 }

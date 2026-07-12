@@ -39,12 +39,14 @@
             overflow: hidden;
         }
 
-        #camera-wrapper{
-            aspect-ratio: 3/4;
-            width: auto;
-            max-width: 100%;
-            position: relative;
-        }
+       #camera-wrapper{
+        width: 100%;
+        max-width: 600px;   /* sebelumnya 450px */
+        aspect-ratio: 4 / 3;
+        border-radius: 2rem;
+        overflow: hidden;
+        background: #000;
+    }
 
         #my_camera{
             position: absolute;
@@ -53,18 +55,12 @@
             height: 100%;
         }
 
+        #my_camera,
         #my_camera video,
         #my_camera canvas{
-            display:block !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
             width: 100% !important;
             height: 100% !important;
-            max-width: none !important;
-            max-height: none !important;
             object-fit: cover;
-            background:#000;
         }
 
         @keyframes scan-line { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
@@ -109,14 +105,15 @@
         try { Webcam.reset(); } catch (e) {}
 
         Webcam.set({
-            width: 480,
-            height: 640,
+            width: 640,
+            height: 480,
             image_format: 'jpeg',
             jpeg_quality: 90,
             flip_horiz: true,
-            constraints:{
-                facingMode: "user",
-                aspectRatio: { ideal: 3/4 }
+            constraints: {
+                width: { ideal: 640 },
+                height: { ideal: 480 },
+                facingMode: "user"
             }
         });
 

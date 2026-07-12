@@ -17,8 +17,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             AdminSeeder::class,
-            jadwalSholatSeeder::class,
-
+            JadwalSholatSeeder::class,
+            MasterJamaahSeeder::class,
+            PresensiSeeder::class,
         ]);
     }
 }
