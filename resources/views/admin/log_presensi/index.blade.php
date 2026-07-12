@@ -160,6 +160,17 @@
                             </div>
                         </div>
 
+                        <div class="mt-4">
+                            <label class="block text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1.5">Sesi Sholat</label>
+                            <select name="sholat"
+                                    class="w-full px-3 py-2.5 bg-gray-50 dark:bg-[#181818] border border-gray-100 dark:border-white/5 rounded-xl text-xs font-bold text-gray-800 dark:text-gray-200 shadow-inner">
+                                <option value="">Semua Sesi</option>
+                                @foreach($daftarSesi as $sesi)
+                                    <option value="{{ $sesi->id_jadwal }}">{{ $sesi->nama_sholat }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
                         <div class="mt-6 flex justify-end gap-2 border-t border-gray-100 dark:border-white/5 pt-4">
                             <button type="button" @click="openModalPdf = false" class="px-5 py-2.5 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs rounded-xl uppercase font-bold transition-all">Batal</button>
                             <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs rounded-xl uppercase font-bold transition-all shadow-lg shadow-emerald-500/20">Preview</button>

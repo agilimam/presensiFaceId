@@ -140,6 +140,7 @@ class LogPresensiController extends Controller
     {
         $startDate = $request->get('date_start', Carbon::today()->format('Y-m-d'));
         $endDate = $request->get('date_end', $startDate);
+        $sesiSholatPilihan = $request->get('sholat'); // id_jadwal, opsional
 
         $start = Carbon::parse($startDate)->startOfDay();
         $end = Carbon::parse($endDate)->endOfDay();
@@ -148,11 +149,21 @@ class LogPresensiController extends Controller
             ? Carbon::parse($startDate)->translatedFormat('d F Y')
             : Carbon::parse($startDate)->translatedFormat('d M') . ' - ' . Carbon::parse($endDate)->translatedFormat('d M Y');
 
+        // Kolom sesi di tabel: kalau difilter cuma 1 sesi, kalau tidak tampil semua urut jam_mulai
+        $daftarSesi = JadwalSholat::orderBy('jam_mulai')
+            ->when($sesiSholatPilihan, function ($query) use ($sesiSholatPilihan) {
+                return $query->where('id_jadwal', $sesiSholatPilihan);
+            })
+            ->get();
+
         $logsRaw = Presensi::with([
             'anggotaKeluarga',
             'anggotaKeluarga.keluarga.anggotaKeluarga',
         ])
             ->whereBetween('waktu_absen', [$start, $end])
+            ->when($sesiSholatPilihan, function ($query) use ($sesiSholatPilihan) {
+                return $query->where('id_jadwal', $sesiSholatPilihan);
+            })
             ->orderBy('waktu_absen', 'asc')
             ->get();
 
@@ -161,7 +172,7 @@ class LogPresensiController extends Controller
         });
 
         $dompdf = app('dompdf.wrapper');
-        $html = view('admin.log_presensi.cetak_pdf', compact('rekapPerTanggal', 'labelTanggal'))->render();
+        $html = view('admin.log_presensi.cetak_pdf', compact('rekapPerTanggal', 'labelTanggal', 'daftarSesi'))->render();
 
         $dompdf->loadHTML($html)->setPaper('a4', 'landscape');
         return $dompdf->stream();

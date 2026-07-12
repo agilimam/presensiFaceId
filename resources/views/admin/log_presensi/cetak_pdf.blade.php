@@ -67,7 +67,14 @@
 <div class="kop-surat">
     <h2>Laporan Hasil Pemantauan Presensi Sholat Jamaah</h2>
     <p>Periode : <strong>{{ $labelTanggal }}</strong></p>
+    @if($daftarSesi->count() === 1)
+        <p>Sesi : <strong>{{ $daftarSesi->first()->nama_sholat }}</strong></p>
+    @endif
 </div>
+
+@php
+    $lebarKolomSesi = 75 / max($daftarSesi->count(), 1);
+@endphp
 
 @foreach($rekapPerTanggal as $tanggal => $logs)
 
@@ -75,7 +82,7 @@
 
     <thead>
         <tr>
-            <th colspan="6" class="tanggal-header" style="text-align:left">
+            <th colspan="{{ $daftarSesi->count() + 1 }}" class="tanggal-header" style="text-align:left">
                 Tanggal :
                 {{ \Carbon\Carbon::parse($tanggal)->translatedFormat('d F Y') }}
             </th>
@@ -83,11 +90,9 @@
 
         <tr>
             <th width="25%">Kepala Keluarga</th>
-            <th width="15%">Subuh</th>
-            <th width="15%">Dzuhur</th>
-            <th width="15%">Ashar</th>
-            <th width="15%">Maghrib</th>
-            <th width="15%">Isya</th>
+            @foreach($daftarSesi as $sesi)
+                <th width="{{ $lebarKolomSesi }}%">{{ $sesi->nama_sholat }}</th>
+            @endforeach
         </tr>
     </thead>
 
@@ -125,10 +130,10 @@
 
             </td>
 
-            @foreach(['Subuh','Dzuhur','Ashar','Maghrib','Isya'] as $sesi)
+            @foreach($daftarSesi as $sesi)
 
                 @php
-                    $absenSesi = $logsKeluarga->where('keterangan_sholat',$sesi);
+                    $absenSesi = $logsKeluarga->where('id_jadwal', $sesi->id_jadwal);
                 @endphp
 
                 <td>

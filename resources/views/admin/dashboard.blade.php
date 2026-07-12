@@ -16,6 +16,36 @@
     <div class="space-y-6">
 
         {{-- ═══════════════════════════════════════════════════════
+             SESI SHOLAT SEDANG BERLANGSUNG
+             ═══════════════════════════════════════════════════════ --}}
+        <div class="bg-gradient-to-br from-emerald-600 via-emerald-600 to-teal-700 p-6 rounded-[2rem] shadow-lg shadow-emerald-600/10 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="absolute right-0 bottom-0 text-emerald-500/20 font-bold text-9xl select-none translate-y-6 translate-x-4">🕌</div>
+
+            <div class="relative z-10">
+                <p class="text-[10px] font-bold text-emerald-100 uppercase tracking-widest flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+                    Sesi Sedang Berlangsung
+                </p>
+                <h2 class="text-4xl font-black text-white mt-1 uppercase tracking-tight">
+                    {{ $sholatSedangBerlangsung->nama_sholat }}
+                </h2>
+                <p class="text-xs text-emerald-100 mt-1">
+                    Dimulai pukul {{ $sholatSedangBerlangsung->jam_mulai->format('H:i') }}
+                </p>
+            </div>
+
+            <div class="relative z-10 text-left md:text-right">
+                <p class="text-[10px] font-bold text-emerald-100 uppercase tracking-widest">Sesi Selanjutnya</p>
+                <h3 class="text-xl font-black text-white mt-1 uppercase tracking-tight">
+                    {{ $sholatBerikutnya->nama_sholat }}
+                </h3>
+                <p class="text-xs text-emerald-100 mt-1">
+                    Pukul {{ $sholatBerikutnya->jam_mulai->format('H:i') }}
+                </p>
+            </div>
+        </div>
+
+        {{-- ═══════════════════════════════════════════════════════
              STAT CARDS (DESAIN PREMIUM GRADIENT BARIS ATAS)
              ═══════════════════════════════════════════════════════ --}}
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -165,7 +195,7 @@
         new Chart(ctx, {
             type: 'bar',
             data: {
-                labels: {!! json_encode($daftarSholat) !!},
+                labels: {!! json_encode($daftarSholat->pluck('nama_sholat')) !!},
                 datasets: [
                     {
                         label: 'Jumlah Jamaah',
