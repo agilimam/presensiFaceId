@@ -11,28 +11,31 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('presensi', function (Blueprint $table) {
-    $table->id('id_presensi'); 
+        Schema::create('presensi', function (Blueprint $table) {
+        $table->id('id_presensi');
 
-    
-    $table->foreignId('id_keluarga')
-          ->constrained('keluarga', 'id_keluarga')
-          ->onDelete('cascade');
+        $table->foreignId('id_keluarga')
+            ->constrained('keluarga', 'id_keluarga')
+            ->onDelete('cascade');
 
-   
-    $table->unsignedBigInteger('id_anggota_keluarga')->nullable();
-    $table->foreign('id_anggota_keluarga')
-          ->references('id_anggota_keluarga')
-          ->on('anggota_keluarga')
-          ->onDelete('cascade');
+        $table->unsignedBigInteger('id_anggota_keluarga')->nullable();
+        $table->foreign('id_anggota_keluarga')
+            ->references('id_anggota_keluarga')
+            ->on('anggota_keluarga')
+            ->onDelete('cascade');
 
-    $table->string('keterangan_sholat');
-    $table->dateTime('waktu_absen');
-    $table->string('face_id')->nullable();
-    $table->string('status')->nullable(); 
-    });
+        // Relasi ke jadwal sholat
+        $table->foreignId('id_jadwal')
+            ->constrained('jadwal_sholat', 'id_jadwal')
+            ->onDelete('cascade');
+
+        $table->dateTime('waktu_absen');
+
+        $table->string('face_id')->nullable();
+
+        $table->enum('status', ['Tepat Waktu', 'Terlambat']);
+        });
     }
-
     /**
      * Reverse the migrations.
      */

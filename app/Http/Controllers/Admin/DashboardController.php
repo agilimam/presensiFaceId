@@ -9,6 +9,8 @@ use App\Models\anggotaKeluarga;
 use App\Models\presensi;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use App\Models\JadwalSholat;
+
 
 class DashboardController extends Controller
 {
@@ -20,36 +22,24 @@ class DashboardController extends Controller
 
         $totalKeluarga = keluarga::count();
         $totalAnggota  = anggotaKeluarga::count();
-
-        $daftarSholat = ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
+        $daftarSholat = JadwalSholat::orderBy('jam_mulai')->get();
 
    
         $absenHariIniRaw = presensi::whereDate('waktu_absen', $hari_ini)->get();
-
-    
-        $jadwal = presensi::getJadwalSholat();
-        $subuhAzanHariIni = $hari_ini->copy()->addMinutes($jadwal['Subuh']['azan']);
-
-        if ($now->gte($subuhAzanHariIni)) {
-            $absenHariIniRaw = $absenHariIniRaw->reject(function ($item) use ($subuhAzanHariIni) {
-                return $item->keterangan_sholat === 'Isya'
-                    && Carbon::parse($item->waktu_absen)->lt($subuhAzanHariIni);
-            });
-        }
-
         $presensiHariIni = $absenHariIniRaw->count();
 
         $chartData = [];
-        foreach ($daftarSholat as $sholat) {
-            $chartData[] = $absenHariIniRaw->where('keterangan_sholat', $sholat)->count();
-        }
-
+        foreach ($daftarSholat as $jadwal) {
+        $chartData[] = $absenHariIniRaw
+                ->where('id_jadwal',$jadwal->id_jadwal)
+                ->count();
+            }
         $jumlahKeluargaAktif = $absenHariIniRaw->pluck('id_keluarga')->unique()->count();
 
         $keluargaFullSesiHariIni = $absenHariIniRaw
             ->groupBy('id_keluarga')
             ->filter(function ($logs) {
-                return $logs->pluck('keterangan_sholat')->unique()->count() >= 5;
+                return $logs->pluck('id_jadwal')->unique()->count() >= 5;
             })
             ->count();
 

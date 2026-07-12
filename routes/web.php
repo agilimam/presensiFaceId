@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Admin\JadwalSholatController;
 use App\Http\Controllers\Admin\DashboardController as AdminController;
 use App\Http\Controllers\User\DashboardController as UserController;
 use App\Http\Controllers\Admin\RegisterController;
@@ -43,6 +44,12 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/admin/register/destroy/{id}', [RegisterController::class, 'destroyFace'])->name('admin.register.destroyFace');
         Route::put('/admin/anggota/{id}', [RegisterController::class, 'updateAnggota'])->name('admin.anggota.update');
         Route::delete('/admin/presensi/{id}', [AdminPresensi::class, 'destroy'])->name('admin.presensi.destroy');
+
+        //ROute Jadwal Sholat
+        Route::get('admin/jadwal-sholat', [JadwalSholatController::class, 'index'])->name('admin.jadwal.index');
+        Route::put('admin/jadwal-sholat/{id}', [JadwalSholatController::class, 'update'])->name('admin.jadwal.update');
+       
+
     });
 
     // GRUP ROLE: KELUARGA / USER

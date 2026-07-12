@@ -6,7 +6,7 @@
                     Log Presensi Mesjid Al-Iman
                 </h2>
                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 uppercase font-semibold tracking-wider">
-                    {{ !$sesiSholatPilihan ? 'Monitoring Rekap Sholat Seluruh Keluarga' : 'Detail Kehadiran Sesi ' . $sesiSholatPilihan }}
+                    {{ !$sesiSholatNama ? 'Monitoring Rekap Sholat Seluruh Keluarga' : 'Detail Kehadiran Sesi ' . $sesiSholatNama }}
                 </p>
             </div>
         </div>
@@ -22,10 +22,10 @@
                        class="px-4 py-2 rounded-xl border transition-all text-xs {{ !$sesiSholatPilihan ? 'bg-emerald-600 border-emerald-600 text-white font-bold' : 'bg-white dark:bg-[#262626] border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400' }}">
                        Semua Sesi
                     </a>
-                    @foreach(['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'] as $s)
-                        <a href="{{ route('admin.presensi.index', array_merge(request()->query(), ['sholat' => $s])) }}"
-                           class="px-4 py-2 rounded-xl border transition-all text-xs {{ $sesiSholatPilihan == $s ? 'bg-emerald-600 border-emerald-600 text-white font-bold' : 'bg-white dark:bg-[#262626] border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400 hover:border-emerald-500' }}">
-                            {{ $s }}
+                    @foreach($daftarSesi as $sesi)
+                        <a href="{{ route('admin.presensi.index', array_merge(request()->query(), ['sholat' => $sesi->id_jadwal])) }}"
+                           class="px-4 py-2 rounded-xl border transition-all text-xs {{ (string) $sesiSholatPilihan === (string) $sesi->id_jadwal ? 'bg-emerald-600 border-emerald-600 text-white font-bold' : 'bg-white dark:bg-[#262626] border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400 hover:border-emerald-500' }}">
+                            {{ $sesi->nama_sholat }}
                         </a>
                     @endforeach
                 </div>
@@ -75,7 +75,7 @@
                         @php
                             // Sesi yang ditampilkan di modal detail: kalau ada filter sesi, cuma sesi itu.
                             // Kalau "Semua Sesi", tampilkan semua sesi yang punya data hari itu.
-                            $sesiUntukDetail = $sesiSholatPilihan ? [$sesiSholatPilihan] : ['Subuh', 'Dzuhur', 'Ashar', 'Maghrib', 'Isya'];
+                            $sesiUntukDetail = $sesiSholatNama ? [$sesiSholatNama] : $daftarSesi->pluck('nama_sholat')->toArray();
                             $detailSesi = [];
                             foreach ($sesiUntukDetail as $sesi) {
                                 if (isset($data[$sesi])) {
@@ -97,10 +97,10 @@
 
                             {{-- Indikator 5 Waktu --}}
                             <div class="flex gap-2 mb-4">
-                                @foreach(['Subuh' => 'S', 'Dzuhur' => 'D', 'Ashar' => 'A', 'Maghrib' => 'M', 'Isya' => 'I'] as $sesi => $inisial)
+                                @foreach($daftarSesi as $sesi)
                                     <div class="flex-1 flex flex-col items-center gap-1">
-                                        <span class="text-[8px] font-bold text-gray-400">{{ $inisial }}</span>
-                                        <div class="w-full h-2 rounded-full {{ isset($data[$sesi]) ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-[#333]' }}"></div>
+                                        <span class="text-[8px] font-bold text-gray-400">{{ \Illuminate\Support\Str::substr($sesi->nama_sholat, 0, 1) }}</span>
+                                        <div class="w-full h-2 rounded-full {{ isset($data[$sesi->nama_sholat]) ? 'bg-emerald-500' : 'bg-gray-200 dark:bg-[#333]' }}"></div>
                                     </div>
                                 @endforeach
                             </div>
